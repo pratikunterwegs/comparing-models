@@ -44,12 +44,9 @@ data
 bash
 figure-scripts
 figures
-man
-R
 scripts
 supplement
 inst
 jobs
-src
 tests
 vignettes
