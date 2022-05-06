@@ -123,3 +123,85 @@ Rcpp::List simulation::do_simulation_mechanistic() {
         Named("move_post") = mdPost.getMoveData()
     );
 }
+
+Rcpp::List simulation::do_simulation_random() {
+    unsigned seed = static_cast<unsigned> (std::chrono::system_clock::now().time_since_epoch().count());
+    rng.seed(seed);
+    
+    // prepare landscape and pop
+    food.initResources();
+    food.countAvailable();
+    Rcpp::Rcout << "landscape with " << food.nClusters << " clusters\n";
+
+    pop.setTrait(mSize);
+    Rcpp::Rcout << "pop with " << pop.nAgents << " agents for " << genmax << " gens " << tmax << " timesteps\n";
+
+    // prepare scenario
+    // return scenario as string
+    std::string scenario_str;
+    switch (scenario)
+    {
+        case 0:
+            Rcpp::Rcout << "this is scenario " << scenario << "random movement\n";
+            break;
+        case 1:
+            Rcpp::Rcout << "this is scenario " << scenario << "optimal movement\n";
+            break;
+        case 2:
+            Rcpp::Rcout << "this is scenario " << scenario << "evolved movement\n";
+            break;
+        
+        default:
+            Rcpp::Rcout << "unknown scenario\n";
+            break;
+    }
+
+    // agent random position in first gen
+    pop.initPos(food);
+
+    Rcpp::Rcout << "initialised population positions\n";
+    Rcpp::DataFrame edgeList;
+
+    Rcpp::Rcout << "created single edge list object\n";
+
+    // all ecological dynamics
+    food.countAvailable();
+    // reset counter and positions
+    pop.counter = std::vector<int> (pop.nAgents, 0);
+
+    // timesteps start here
+    for (size_t t = 0; t < static_cast<size_t>(tmax); t++)
+    {
+        // resources regrow
+        food.regenerate();
+        pop.updateRtree();
+        // movement section
+        pop.move_random();
+
+        mdPre.updateMoveData(pop, t);
+
+        // foraging -- split into parallelised picking
+        // and non-parallel exploitation
+        pop.pickForageItem(food, nThreads);
+        pop.doForage(food);
+
+        // count associations
+        pop.countAssoc(nThreads);
+        // timestep ends here
+    }
+    pop.energy = pop.intake;
+    
+    // log population traits and outcomes
+    gen_data.updateGenData(pop, 1);
+    edgeList = pop.pbsn.getNtwkDf();
+
+    Rcpp::Rcout << "gen: " << gen << " --- logged edgelist\n";
+    Rcpp::Rcout << "data prepared\n";
+
+    return Rcpp::List::create(
+        Named("gen_data") = gen_data.getGenData(),
+        Named("edgeLists") = edgeLists,
+        Named("move_data") = mdPre.getMoveData()
+    );
+}
+
