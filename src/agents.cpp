@@ -676,6 +676,7 @@ void Population::move_optimal(const Resources &food, const int nThreads) {
         }
     }
 }
+
 // function to paralellise choice of forage item
 void Population::pickForageItem(const Resources &food, const int nThreads){
     shufflePop();
