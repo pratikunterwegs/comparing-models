@@ -58,25 +58,29 @@ Rcpp::List simulation::do_simulation_mechanistic() {
     for(int gen = 0; gen < genmax; gen++) {
 
         food.countAvailable();
-        // Rcpp::Rcout << "food available = " << food.nAvailable << "\n";
+        Rcpp::Rcout << "food available = " << food.nAvailable << "\n";
 
         // reset counter and positions
         pop.counter = std::vector<int> (pop.nAgents, 0);
         
-        // Rcpp::Rcout << "entering ecological timescale\n";
+        Rcpp::Rcout << "entering ecological timescale\n";
 
         // timesteps start here
         for (size_t t = 0; t < static_cast<size_t>(tmax); t++)
         {
             // resources regrow
             food.regenerate();
+            Rcpp::Rcout << "food regenerated\n";
             pop.updateRtree();
+            Rcpp::Rcout << "updated r tree\n";
             // movement section
             pop.move_mechanistic(food, nThreads);
+            Rcpp::Rcout << "moved\n";
 
             if(gen == (genmax - 1)) {
                 mdPost.updateMoveData(pop, t);
             }
+            Rcpp::Rcout << "logged movement data\n";
 
             // foraging -- split into parallelised picking
             // and non-parallel exploitation
@@ -93,7 +97,7 @@ Rcpp::List simulation::do_simulation_mechanistic() {
         // update gendata
         if ((gen == (genmax - 1)) | (gen % increment_log == 0)) {
 
-            // Rcpp::Rcout << "logging data at gen: " << gen << "\n";
+            Rcpp::Rcout << "logging data at gen: " << gen << "\n";
             gen_data.updateGenData(pop, gen);
         }
 
@@ -136,13 +140,13 @@ Rcpp::List simulation::do_simulation_random() {
     switch (scenario)
     {
         case 0:
-            Rcpp::Rcout << "this is scenario " << scenario << "random movement\n";
+            Rcpp::Rcout << "this is scenario " << scenario << ": random movement\n";
             break;
         case 1:
-            Rcpp::Rcout << "this is scenario " << scenario << "optimal movement\n";
+            Rcpp::Rcout << "this is scenario " << scenario << ": optimal movement\n";
             break;
         case 2:
-            Rcpp::Rcout << "this is scenario " << scenario << "evolved movement\n";
+            Rcpp::Rcout << "this is scenario " << scenario << ": evolved movement\n";
             break;
         
         default:
@@ -170,6 +174,7 @@ Rcpp::List simulation::do_simulation_random() {
         food.regenerate();
         pop.updateRtree();
         // movement section
+        Rcpp::Rcout << "now moving randomly!\n";
         pop.move_random(food);
 
         mdPre.updateMoveData(pop, t);
@@ -186,14 +191,14 @@ Rcpp::List simulation::do_simulation_random() {
     pop.energy = pop.intake;
     
     // log population traits and outcomes
-    gen_data.updateGenData(pop, 1);
+    // gen_data.updateGenData(pop, 1);
     edgeList = pop.pbsn.getNtwkDf();
 
     Rcpp::Rcout << "gen: " << 1 << " --- logged edgelist\n";
     Rcpp::Rcout << "data prepared\n";
 
     return Rcpp::List::create(
-        Named("gen_data") = gen_data.getGenData(),
+        // Named("gen_data") = gen_data.getGenData(),
         Named("edgeList") = edgeList,
         Named("move_data") = mdPre.getMoveData()
     );
@@ -246,38 +251,43 @@ S4 model_case_2(const int scenario,
                 const float mSize) {
 
     // make simulation class with input parameters                            
-    simulation this_sim(popsize, scenario, nItems, landsize,
-                        nClusters, clusterSpread, tmax, genmax, 
-                        range_perception,
-                        handling_time, regen_time,
-                        nThreads, dispersal,
-                        mProb, mSize);
+    simulation this_sim(popsize, scenario, nItems,
+        landsize, nClusters, clusterSpread, tmax,
+        genmax, range_perception, handling_time,
+        regen_time, nThreads, dispersal,
+        mProb, mSize
+    );
 
     // return scenario as string
     std::string scenario_str;
     Rcpp::List simOutput;
-    switch (scenario)
-    {
-        case 0:
-            scenario_str = std::string("random movement");
-            // do the simulation using the simulation class function                        
-            simOutput = this_sim.do_simulation_random();
-            break;
-        case 1:
-            scenario_str = std::string("optimal movement");
-            // do the simulation using the simulation class function                        
-            // simOutput = this_sim.do_simulation();
-            break;
-        case 2:
-            scenario_str = std::string("evolved movement");
-            // do the simulation using the simulation class function                        
-            simOutput = this_sim.do_simulation_mechanistic();
-            break;
-        
-        default:
-            scenario_str = std::string("unknown scenario");
-            break;
+    if(scenario == 0) {
+        scenario_str = std::string("random movement");
+        // do the simulation using the simulation class function                        
+        simOutput = this_sim.do_simulation_random();
     }
+    // switch (scenario)
+    // {
+    //     case 0:
+    //         scenario_str = std::string("random movement");
+    //         // do the simulation using the simulation class function                        
+    //         simOutput = this_sim.do_simulation_random();
+    //         break;
+    //     case 1:
+    //         scenario_str = std::string("optimal movement");
+    //         // do the simulation using the simulation class function                        
+    //         // simOutput = this_sim.do_simulation();
+    //         break;
+    //     case 2:
+    //         scenario_str = std::string("evolved movement");
+    //         // do the simulation using the simulation class function                        
+    //         simOutput = this_sim.do_simulation_mechanistic();
+    //         break;
+        
+    //     default:
+    //         scenario_str = std::string("unknown scenario");
+    //         break;
+    // }
 
     // get generation data from output
     Rcpp::List gen_data = simOutput["gen_data"];
