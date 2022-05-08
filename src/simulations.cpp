@@ -3,9 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "simulations.h"
-
 #include <Rcpp.h>
+#include "simulations.h"
 
 using namespace Rcpp;
 
@@ -75,10 +74,6 @@ Rcpp::List simulation::do_simulation_mechanistic() {
             // movement section
             pop.move_mechanistic(food, nThreads);
 
-            // log movement
-            if(gen == std::max(gen_init - 1, 2)) {
-                mdPre.updateMoveData(pop, t);
-            }
             if(gen == (genmax - 1)) {
                 mdPost.updateMoveData(pop, t);
             }
@@ -119,7 +114,6 @@ Rcpp::List simulation::do_simulation_mechanistic() {
     return Rcpp::List::create(
         Named("gen_data") = gen_data.getGenData(),
         Named("edgeLists") = edgeLists,
-        Named("move_pre") = mdPre.getMoveData(),
         Named("move_post") = mdPost.getMoveData()
     );
 }
@@ -176,7 +170,7 @@ Rcpp::List simulation::do_simulation_random() {
         food.regenerate();
         pop.updateRtree();
         // movement section
-        pop.move_random();
+        pop.move_random(food);
 
         mdPre.updateMoveData(pop, t);
 
@@ -195,12 +189,12 @@ Rcpp::List simulation::do_simulation_random() {
     gen_data.updateGenData(pop, 1);
     edgeList = pop.pbsn.getNtwkDf();
 
-    Rcpp::Rcout << "gen: " << gen << " --- logged edgelist\n";
+    Rcpp::Rcout << "gen: " << 1 << " --- logged edgelist\n";
     Rcpp::Rcout << "data prepared\n";
 
     return Rcpp::List::create(
         Named("gen_data") = gen_data.getGenData(),
-        Named("edgeLists") = edgeLists,
+        Named("edgeList") = edgeList,
         Named("move_data") = mdPre.getMoveData()
     );
 }
@@ -237,24 +231,20 @@ Rcpp::List simulation::do_simulation_random() {
 //' @return An S4 class, `pathomove_output`, with simulation outcomes.
 // [[Rcpp::export]]
 S4 model_case_2(const int scenario,
-                        const int popsize,
-                        const int nItems, const float landsize,
-                        const int nClusters,
-                        const float clusterSpread,
-                        const int tmax,
-                        const int genmax,
-                        const float range_perception,
-                        const int handling_time,
-                        const int regen_time,
-                        const int nThreads,
-                        const float dispersal,
-                        const float mProb,
-                        const float mSize) {
+                const int popsize,
+                const int nItems, const float landsize,
+                const int nClusters,
+                const float clusterSpread,
+                const int tmax,
+                const int genmax,
+                const float range_perception,
+                const int handling_time,
+                const int regen_time,
+                const int nThreads,
+                const float dispersal,
+                const float mProb,
+                const float mSize) {
 
-    // check that intial infections is less than popsize
-    if(initialInfections > popsize) {
-        Rcpp::stop("More infections than agents!");
-    }
     // make simulation class with input parameters                            
     simulation this_sim(popsize, scenario, nItems, landsize,
                         nClusters, clusterSpread, tmax, genmax, 
@@ -265,22 +255,23 @@ S4 model_case_2(const int scenario,
 
     // return scenario as string
     std::string scenario_str;
+    Rcpp::List simOutput;
     switch (scenario)
     {
         case 0:
             scenario_str = std::string("random movement");
             // do the simulation using the simulation class function                        
-            Rcpp::List simOutput = this_sim.do_simulation_random();
+            simOutput = this_sim.do_simulation_random();
             break;
         case 1:
             scenario_str = std::string("optimal movement");
             // do the simulation using the simulation class function                        
-            Rcpp::List simOutput = this_sim.do_simulation();
+            // simOutput = this_sim.do_simulation();
             break;
         case 2:
             scenario_str = std::string("evolved movement");
             // do the simulation using the simulation class function                        
-            Rcpp::List simOutput = this_sim.do_simulation_mechanistic();
+            simOutput = this_sim.do_simulation_mechanistic();
             break;
         
         default:
