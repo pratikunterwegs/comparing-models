@@ -408,62 +408,44 @@ void Population::move_random(const Resources &food) {
         angle += increment;
     }
 
+    std::uniform_int_distribution<int> direction(0, n_samples);
+
     for (int i = 0; i < nAgents; ++i) {
         int id = order[i];
         if (counter[id] > 0) {
             counter[id] --;
         }
         else {
-            // first assess current location
-            float sampleX = coordX[id];
-            float sampleY = coordY[id]; 
 
-            float suit_origin = noise(rng);
-
-            float newX = sampleX;
-            float newY = sampleY;
-            // now sample at three locations around
-            for(size_t j = 0; j < sample_angles.size(); j++) {
-                float t1_ = static_cast<float>(cos(sample_angles[j]));
-                float t2_ = static_cast<float>(sin(sample_angles[j]));
-                
-                // use range for agents to determine sample locs
-                sampleX = coordX[id] + (range_perception * t1_);
-                sampleY = coordY[id] + (range_perception * t2_);
-
-                // crudely wrap sampling location
-                if((sampleX > food.dSize) | (sampleX < 0.f)) {
-                    sampleX = std::fabs(std::fmod(sampleX, food.dSize));
-                }
-                if((sampleY > food.dSize) | (sampleY < 0.f)) {
-                    sampleY = std::fabs(std::fmod(sampleY, food.dSize));
-                }
-
-                float suit_dest = noise(rng);
-
-                if (suit_dest > suit_origin) {
-                    // where does the individual really go
-                    newX = coordX[id] + (range_perception * t1_);
-                    newY = coordY[id] + (range_perception * t2_);
-
-                    // crudely wrap MOVEMENT location
-                    if((newX > food.dSize) | (newX < 0.f)) {
-                        newX = std::fabs(std::fmod(newX, food.dSize));
-                    }
-                    if((newY > food.dSize) | (newY < 0.f)) {
-                        newY = std::fabs(std::fmod(newY, food.dSize));
-                    }
-
-                    assert(newX < food.dSize && newX > 0.f);
-                    assert(newY < food.dSize && newY > 0.f);
-                    suit_origin = suit_dest;
-                }
+            int this_direction = direction(rng);
+            if (this_direction == 0) {
+                // no move
             }
-            // distance to be moved
-            moved[id] += range_perception;
+            else {
+                float t1_ = static_cast<float>(cos(sample_angles[this_direction]));
+                float t2_ = static_cast<float>(sin(sample_angles[this_direction]));
 
-            // set locations
-            coordX[id] = newX; coordY[id] = newY;
+                float newX = coordX[id] + (range_perception * t1_);
+                float newY = coordY[id] + (range_perception * t2_);
+
+                // handle wrapping
+                // crudely wrap sampling location
+                if((newX > food.dSize) | (newX < 0.f)) {
+                    newX = std::fabs(std::fmod(newX, food.dSize));
+                }
+                if((newY > food.dSize) | (newY < 0.f)) {
+                    newY = std::fabs(std::fmod(newY, food.dSize));
+                }
+
+                assert(newX < food.dSize && newX > 0.f);
+                assert(newY < food.dSize && newY > 0.f);
+
+                // distance to be moved
+                moved[id] += range_perception;
+
+                // set locations
+                coordX[id] = newX; coordY[id] = newY;
+            }
         }
     }
 }
