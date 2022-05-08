@@ -487,8 +487,6 @@ void Population::move_optimal(const Resources &food, const int nThreads) {
             // first assess current location
             float sampleX = coordX[id];
             float sampleY = coordY[id]; 
-                float sampleY = coordY[id]; 
-            float sampleY = coordY[id]; 
 
             float foodHere = 0.f;
             // count local food only if items are available
