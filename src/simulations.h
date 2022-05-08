@@ -21,7 +21,7 @@ public:
                const float mProb,
                const float mSize):
         // population, food, and data structures
-        pop (scenario, popsize, range_perception, handling_time),
+        pop (popsize, range_perception, handling_time, scenario),
         food(nItems, landsize, nClusters, clusterSpread, regen_time),
         gen_data (genmax, popsize, std::max(static_cast<int>(static_cast<float>(genmax) * 0.001f), 2)), // increment hardcoded
 
