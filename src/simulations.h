@@ -29,27 +29,17 @@ public:
         scenario(scenario),
         tmax(tmax),
         genmax(genmax),
-        g_patho_init(g_patho_init),
 
         // agent perception and behaviour, food growth
-        range_food(range_food),
-        range_agents(range_agents),
-        range_move(range_move),
+        range_perception(range_perception),
         handling_time(handling_time),
         regen_time(regen_time),
-
-        // disease parameters
-        initialInfections(initialInfections),
-        costInfect(costInfect),
-        pTransmit(pTransmit),
 
         // parallelisation
         nThreads (nThreads),
 
         // natal dispersal
         dispersal(dispersal),
-        infect_percent(infect_percent),
-
         // mutation probability and step size
         mProb(mProb),
         mSize(mSize),
@@ -63,17 +53,14 @@ public:
     Population pop;
     Resources food;
     genData gen_data;
-    const int scenario, tmax, genmax, g_patho_init;
-    const float range_food, range_agents, range_move;
+    const int scenario, tmax, genmax;
+    const float range_perception;
     const int handling_time;
 
-    const int regen_time, initialInfections;
-    const float costInfect;
-    float pTransmit;
+    const int regen_time;
     int nThreads;
     const float dispersal;
-    const bool infect_percent;
-
+    
     const float mProb, mSize;
 
     moveData mdPre, mdPost;
