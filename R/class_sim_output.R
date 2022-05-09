@@ -23,9 +23,7 @@ check_simulation_output <- function(object) {
 #' Defines the `simulation_output` class.
 #'
 #' @slot parameters list.
-#' @slot generations integer.
-#' @slot infections_per_gen integer.
-#' @slot trait_data list.
+#' @slot trait_data data.frame.
 #'
 #' @export
 setClass(
@@ -35,15 +33,13 @@ setClass(
   # define the types of the class
   slots = c(
     parameters = "list",
-    generations = "integer",
-    trait_data = "list"
+    trait_data = "data.frame"
   ),
 
   # define the default values of the slots
   prototype = list(
     parameters = list(),
-    generations = NA_integer_,
-    trait_data = list()
+    trait_data = data.frame()
   ),
 
   # check validity of class
