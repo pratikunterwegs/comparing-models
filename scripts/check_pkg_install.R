@@ -2,7 +2,7 @@
 Rcpp::compileAttributes()
 devtools::build()
 devtools::load_all()
-# devtools::install()
+devtools::install(build = T, upgrade = "never")
 devtools::document()
 
 library(ggplot2)
