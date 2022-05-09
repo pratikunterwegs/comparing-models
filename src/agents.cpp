@@ -417,26 +417,23 @@ void Population::move_random(const Resources &food) {
                 float t1_ = static_cast<float>(cos(static_cast<float>(this_direction) * increment));
                 float t2_ = static_cast<float>(sin(static_cast<float>(this_direction) * increment));
 
-                // float newX = coordX[i] + (range_perception * t1_);
-                // float newY = coordY[i] + (range_perception * t2_);
+                float newX = coordX[i] + (range_perception * t1_);
+                float newY = coordY[i] + (range_perception * t2_);
 
-                // // handle wrapping
-                // // crudely wrap sampling location
-                // if((newX > food.dSize) | (newX < 0.f)) {
-                //     newX = std::fabs(std::fmod(newX, food.dSize));
-                // }
-                // if((newY > food.dSize) | (newY < 0.f)) {
-                //     newY = std::fabs(std::fmod(newY, food.dSize));
-                // }
-
-                // assert(newX < food.dSize && newX > 0.f);
-                // assert(newY < food.dSize && newY > 0.f);
+                // handle wrapping
+                // crudely wrap sampling location
+                if((newX > food.dSize) | (newX < 0.f)) {
+                    newX = std::fabs(std::fmod(newX, food.dSize));
+                }
+                if((newY > food.dSize) | (newY < 0.f)) {
+                    newY = std::fabs(std::fmod(newY, food.dSize));
+                }
 
                 // distance to be moved
-                // moved[i] += range_perception;
+                moved[i] += range_perception;
 
                 // set locations
-                // coordX[i] = newX; coordY[i] = newY;
+                coordX[i] = newX; coordY[i] = newY;
             }
         }
     }
@@ -644,7 +641,7 @@ void Population::countAssoc(const int nThreads) {
     for (int i = 0; i < nAgents; ++i) {
         // count nearby agents and update raw associations
         std::vector<int> nearby_agents = getNeighbourId(coordX[i], coordY[i]);
-        associations[i] += nearby_agents.size() - 1;
+        associations[i] += nearby_agents.size();
         // subtract 1 to exclude self
 
         // loop over nearby agents and update association matrix
