@@ -138,13 +138,10 @@ Rcpp::List simulation::do_simulation_random() {
         food.regenerate();
         pop.updateRtree();
         // movement section
-        Rcpp::Rcout << "now moving randomly!\n";
         pop.move_random(food);
 
-        Rcpp::Rcout << "moved randomly!\n";
         // mdPre.updateMoveData(pop, t);
 
-        Rcpp::Rcout << "updated movement data!\n";
         // foraging -- split into parallelised picking
         // and non-parallel exploitation
         pop.pickForageItem(food, nThreads);
