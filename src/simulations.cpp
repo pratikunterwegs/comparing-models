@@ -22,56 +22,53 @@ Rcpp::List simulation::do_simulation_mechanistic() {
     Rcpp::Rcout << "pop with " << pop.nAgents << " agents for " << genmax << " gens " << tmax << " timesteps\n";
 
     // prepare scenario
-    Rcpp::Rcout << "this is scenario " << scenario << "evolved movement\n";
+    Rcpp::Rcout << "this is scenario " << scenario << ": evolved movement\n";
 
     // agent random position in first gen
     pop.initPos(food);
-
-    Rcpp::Rcout << "initialised population positions\n";
-    Rcpp::List edgeLists;
-
-    Rcpp::Rcout << "created edge list object\n";
-
-    // agent data logging increment
-    int increment_log = std::max((static_cast<int>(static_cast<float>(genmax) * 0.001f)), 2);
-
-    Rcpp::Rcout << "logging data after gens: " << increment_log << "\n";
+    // Rcpp::Rcout << "initialised population positions\n";
+    
+    Rcpp::DataFrame edgeList;
+    Rcpp::DataFrame pop_trait_data;
+    // Rcpp::Rcout << "created edge list object\n";
 
     // go over gens
     for(int gen = 0; gen < genmax; gen++) {
 
         food.countAvailable();
-        Rcpp::Rcout << "food available = " << food.nAvailable << "\n";
+        // Rcpp::Rcout << "food available = " << food.nAvailable << "\n";
 
         // reset counter and positions
         pop.counter = std::vector<int> (pop.nAgents, 0);
         
-        Rcpp::Rcout << "entering ecological timescale\n";
+        // Rcpp::Rcout << "entering ecological timescale\n";
 
         // timesteps start here
         for (size_t t = 0; t < static_cast<size_t>(tmax); t++)
         {
             // resources regrow
             food.regenerate();
-            Rcpp::Rcout << "food regenerated\n";
+            // Rcpp::Rcout << "food regenerated\n";
             pop.updateRtree();
-            Rcpp::Rcout << "updated r tree\n";
+            // Rcpp::Rcout << "updated r tree\n";
             // movement section
             pop.move_mechanistic(food, nThreads);
-            Rcpp::Rcout << "moved\n";
+            // Rcpp::Rcout << "moved\n";
 
-            if(gen == (genmax - 1)) {
-                mdPost.updateMoveData(pop, t);
-            }
-            Rcpp::Rcout << "logged movement data\n";
+            // if(gen == (genmax - 1)) {
+            //     mdPost.updateMoveData(pop, t);
+            // }
+            // Rcpp::Rcout << "logged movement data\n";
 
             // foraging -- split into parallelised picking
             // and non-parallel exploitation
             pop.pickForageItem(food, nThreads);
             pop.doForage(food);
 
-            // count associations
-            // pop.countAssoc(nThreads);
+            // count associations --- only in last gen
+            if(gen == (genmax - 1)) {
+                pop.countAssoc(nThreads);
+            }
             // timestep ends here
         }
         
@@ -82,6 +79,12 @@ Rcpp::List simulation::do_simulation_mechanistic() {
         //     Rcpp::Rcout << "gen: " << gen << " --- logged edgelist\n";
         // }
 
+        // log data in the last generation
+        if (gen == (genmax - 1)) {
+            pop_trait_data = pop.returnPopData();
+            edgeList = pop.pbsn.getNtwkDf();
+        }
+
         // reproduce
         pop.Reproduce(food, dispersal, mProb, mSize);
 
@@ -89,11 +92,12 @@ Rcpp::List simulation::do_simulation_mechanistic() {
     }
     // all gens end here
 
+    Rcpp::Rcout << "gen: " << genmax << " --- logged edgelist\n";
     Rcpp::Rcout << "data prepared\n";
 
     return Rcpp::List::create(
-        Named("gen_data") = pop.returnPopData()
-        // Named("edgeLists") = edgeLists,
+        Named("gen_data") = pop_trait_data,
+        Named("edgeList") = edgeList
         // Named("move_post") = mdPost.getMoveData()
     );
 }
