@@ -51,3 +51,35 @@ make_network = function(object, weight_threshold) {
 
     g
 }
+
+#' Plot networks from data from `simulation_output` objects.
+#'
+#' @param g A `tidygraph` object.
+#' 
+#' @return A `ggplot` object.
+#' @export
+plot_network = function(g) {
+    ggraph::ggraph(
+        g, x = xn, y = yn
+    ) +
+    ggraph::geom_edge_fan(
+        edge_width = 0.5,
+        edge_alpha = 0.5,
+        ggplot2::aes(
+            colour = weight
+        ),
+        show.legend = FALSE
+    )+
+    ggraph::geom_node_point(
+        ggplot2::aes(
+          fill = assoc,
+          size = assoc
+        ),
+        shape = 21,
+        show.legend = T
+    )+
+    ggplot2::scale_colour_distiller()+
+    ggplot2::scale_size_continuous(
+        range = c(0.5, 3)
+    )
+}
