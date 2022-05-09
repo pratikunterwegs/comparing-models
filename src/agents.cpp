@@ -644,7 +644,8 @@ void Population::countAssoc(const int nThreads) {
     for (int i = 0; i < nAgents; ++i) {
         // count nearby agents and update raw associations
         std::vector<int> nearby_agents = getNeighbourId(coordX[i], coordY[i]);
-        associations[i] += nearby_agents.size();
+        associations[i] += nearby_agents.size() - 1;
+        // subtract 1 to exclude self
 
         // loop over nearby agents and update association matrix
         for (size_t j = 0; j < nearby_agents.size(); j++)
