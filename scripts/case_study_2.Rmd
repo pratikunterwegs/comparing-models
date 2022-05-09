@@ -1,0 +1,104 @@
+
+```{r}
+# load packages
+library(data.table)
+library(ggplot2)
+```
+
+## Random movement
+
+```{r}
+# run scenarios
+data_random <- lapply(seq(20), function(x) {
+  linkmoveecoevo::model_case_2(
+    scenario = 0,
+    landsize = 60,
+    nItems = 1800,
+    clusterSpread = 1.0,
+    nClusters = 100,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 500,
+    genmax = 1,
+    dispersal = 3,
+    range_perception = 1.0,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 1
+  )
+})
+
+sapply(data_random, class)
+```
+
+```{r}
+# examine intake in random movement
+data_random_intake = lapply(data_random, slot, "trait_data")
+data_random_intake = rbindlist(data_random_intake)
+```
+
+```{r}
+# data plot
+ggplot(data_random_intake)+
+    geom_jitter(
+        aes(moved, assoc),
+        alpha = 0.2
+    )
+
+ggplot(data_random_intake)+
+    geom_histogram(
+        aes(
+            moved
+        )
+    )
+```
+
+## Optimal movement
+
+```{r}
+# run scenarios
+data_optimal <- lapply(seq(20), function(x) {
+  linkmoveecoevo::model_case_2(
+    scenario = 1,
+    landsize = 60,
+    nItems = 1800,
+    clusterSpread = 1.0,
+    nClusters = 100,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 500,
+    genmax = 1,
+    dispersal = 3,
+    range_perception = 1.0,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 1
+  )
+})
+
+sapply(data_optimal, class)
+```
+
+```{r}
+# examine intake in optimal movement
+data_optimal_intake = lapply(data_optimal, slot, "trait_data")
+data_optimal_intake = rbindlist(data_optimal_intake)
+```
+
+```{r}
+# data plot
+ggplot(data_optimal_intake)+
+    geom_jitter(
+        aes(moved, assoc),
+        alpha = 0.2
+    )
+
+ggplot(data_optimal_intake)+
+    geom_histogram(
+        aes(
+            moved
+        )
+    )
+```
