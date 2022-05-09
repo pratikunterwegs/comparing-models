@@ -22,24 +22,7 @@ Rcpp::List simulation::do_simulation_mechanistic() {
     Rcpp::Rcout << "pop with " << pop.nAgents << " agents for " << genmax << " gens " << tmax << " timesteps\n";
 
     // prepare scenario
-    // return scenario as string
-    std::string scenario_str;
-    switch (scenario)
-    {
-        case 0:
-            Rcpp::Rcout << "this is scenario " << scenario << "random movement\n";
-            break;
-        case 1:
-            Rcpp::Rcout << "this is scenario " << scenario << "optimal movement\n";
-            break;
-        case 2:
-            Rcpp::Rcout << "this is scenario " << scenario << "evolved movement\n";
-            break;
-        
-        default:
-            Rcpp::Rcout << "unknown scenario\n";
-            break;
-    }
+    Rcpp::Rcout << "this is scenario " << scenario << "evolved movement\n";
 
     // agent random position in first gen
     pop.initPos(food);
@@ -88,23 +71,16 @@ Rcpp::List simulation::do_simulation_mechanistic() {
             pop.doForage(food);
 
             // count associations
-            pop.countAssoc(nThreads);
+            // pop.countAssoc(nThreads);
             // timestep ends here
         }
         
         pop.energy = pop.intake;
 
-        // update gendata
-        if ((gen == (genmax - 1)) | (gen % increment_log == 0)) {
-
-            Rcpp::Rcout << "logging data at gen: " << gen << "\n";
-            gen_data.updateGenData(pop, gen);
-        }
-
-        if((gen == 0) | ((gen % (genmax / 10)) == 0) | (gen == genmax - 1)) {
-            edgeLists.push_back(pop.pbsn.getNtwkDf());
-            Rcpp::Rcout << "gen: " << gen << " --- logged edgelist\n";
-        }
+        // if((gen == 0) | ((gen % (genmax / 10)) == 0) | (gen == genmax - 1)) {
+        //     edgeLists.push_back(pop.pbsn.getNtwkDf());
+        //     Rcpp::Rcout << "gen: " << gen << " --- logged edgelist\n";
+        // }
 
         // reproduce
         pop.Reproduce(food, dispersal, mProb, mSize);
@@ -116,9 +92,9 @@ Rcpp::List simulation::do_simulation_mechanistic() {
     Rcpp::Rcout << "data prepared\n";
 
     return Rcpp::List::create(
-        Named("gen_data") = gen_data.getGenData(),
-        Named("edgeLists") = edgeLists,
-        Named("move_post") = mdPost.getMoveData()
+        Named("gen_data") = pop.returnPopData()
+        // Named("edgeLists") = edgeLists,
+        // Named("move_post") = mdPost.getMoveData()
     );
 }
 
