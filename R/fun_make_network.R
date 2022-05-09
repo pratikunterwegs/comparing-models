@@ -64,9 +64,9 @@ plot_network = function(g) {
     ) +
     ggraph::geom_edge_fan(
         edge_width = 0.5,
-        edge_alpha = 0.5,
+        edge_colour = "grey40",
         ggplot2::aes(
-            colour = weight
+            edge_alpha = weight
         ),
         show.legend = FALSE
     )+
@@ -76,10 +76,15 @@ plot_network = function(g) {
           size = assoc
         ),
         shape = 21,
-        show.legend = T
+        show.legend = F
     )+
-    ggplot2::scale_colour_distiller()+
+    ggplot2::scale_colour_distiller(
+        palette = "Greys"
+    )+
     ggplot2::scale_size_continuous(
-        range = c(0.5, 3)
+        range = c(0.5, 5)
+    )+
+    ggraph::scale_edge_alpha(
+        range = c(0.3, 1)
     )
 }
