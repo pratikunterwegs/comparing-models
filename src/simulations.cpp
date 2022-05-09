@@ -230,6 +230,10 @@ S4 model_case_2(const int scenario,
         scenario_str = std::string("random movement");
         // do the simulation using the simulation class function                        
         simOutput = this_sim.do_simulation_random();
+    } else if(scenario == 2) {
+        scenario_str = std::string("evolved movement");
+        // do the simulation using the simulation class function                        
+        simOutput = this_sim.do_simulation_mechanistic();
     }
 
     // get generation data from output
