@@ -1,54 +1,22 @@
 
 #include "data_types.h"
 
-// function to update gendata
-void genData::updateGenData (Population &pop, const int g_) {
-    
-    int i = g_ / increment;
-    // get social network measures
-    // std::vector<float> measures = pop.pbsn.ntwkMeasures();
-    
-    // get pop data
-    gIntake[i] = pop.intake; // this returns the intake! not the net energy
-    gEnergy[i] = pop.energy; // this returns the net energy, fitness proxy
-    gSF[i] = pop.sF;
-    gSH[i] = pop.sH;
-    gSN[i] = pop.sN;
-    gX[i] = pop.initX;
-    gY[i] = pop.initY;
-    gXn[i] = pop.coordX;
-    gYn[i] = pop.coordY;
-    gAssoc[i] = pop.associations;
-    gMoved[i] = pop.moved;
-
-    gens[i] = g_;
-}
-
 // function to return gen data as an rcpp list
-Rcpp::List genData::getGenData() {
-    Rcpp::List gDataList (gSampled);
-    for (int i = 0; i < gSampled; i++)
-    {
-        gDataList[i] = DataFrame::create(
-            Named("intake") = gIntake[i],
-            Named("energy") = gEnergy[i],
-            Named("sF") = gSF[i],
-            Named("sH") = gSH[i],
-            Named("sN") = gSN[i],
-            Named("x") = gX[i],
-            Named("y") = gY[i],
-            Named("xn") = gXn[i],
-            Named("yn") = gYn[i],
-            Named("assoc") = gAssoc[i],
-            Named("moved") = gMoved[i]
-        );
-    }
-    List dataToReturn = List::create(
-        Named("pop_data") = gDataList,
-        Named("gens") = gens
+Rcpp::DataFrame Population::returnPopData() {
+    Rcpp::DataFrame this_data = Rcpp::DataFrame::create(
+        Named("intake") = intake,
+        Named("energy") = energy,
+        Named("sF") = sF,
+        Named("sH") = sH,
+        Named("sN") = sN,
+        Named("x") = initX,
+        Named("y") = initY,
+        Named("xn") = coordX,
+        Named("yn") = coordY,
+        Named("assoc") = associations,
+        Named("moved") = moved
     );
-
-    return dataToReturn;
+    return this_data;
 }
 
 void moveData::updateMoveData(Population &pop, const int t_) {
