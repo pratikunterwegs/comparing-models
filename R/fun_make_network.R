@@ -26,7 +26,7 @@ make_network = function(object, weight_threshold) {
 
     # handle nodes
     nodes = object@trait_data
-    nodes = data.table::as.data.table(nodes)
+    data.table::setDT(nodes)
     nodes$id = seq(nrow(nodes))
 
     # get movement strategy
