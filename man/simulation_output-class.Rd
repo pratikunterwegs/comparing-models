@@ -12,10 +12,8 @@ Defines the \code{simulation_output} class.
 \describe{
 \item{\code{parameters}}{list.}
 
-\item{\code{generations}}{integer.}
+\item{\code{trait_data}}{data.frame.}
 
-\item{\code{infections_per_gen}}{integer.}
-
-\item{\code{trait_data}}{list.}
+\item{\code{edge_list}}{data.frame.}
 }}
 
