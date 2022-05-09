@@ -86,7 +86,6 @@ jobs:
         run: |
           devtools::build(vignettes = FALSE)
           devtools::install(upgrade = "never", build_vignettes = FALSE)
-          devtools::test()
         shell: Rscript {0}
 
       # - name: Install covr and do covr test coverage
