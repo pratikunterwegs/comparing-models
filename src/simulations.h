@@ -66,6 +66,7 @@ public:
     // funs
     Rcpp::List do_simulation_mechanistic();
     Rcpp::List do_simulation_random();
+    Rcpp::List do_simulation_optimal();
 
 };
 
