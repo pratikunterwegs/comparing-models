@@ -152,14 +152,14 @@ Rcpp::List simulation::do_simulation_random() {
     }
     pop.energy = pop.intake;
     
-    // edgeList = pop.pbsn.getNtwkDf();
+    edgeList = pop.pbsn.getNtwkDf();
 
     Rcpp::Rcout << "gen: " << 1 << " --- logged edgelist\n";
     Rcpp::Rcout << "data prepared\n";
 
     return Rcpp::List::create(
-        Named("gen_data") = pop.returnPopData()
-        // Named("edgeList") = edgeList
+        Named("gen_data") = pop.returnPopData(),
+        Named("edgeList") = edgeList
         // Named("move_data") = mdPre.getMoveData()
     );
 }
@@ -230,11 +230,13 @@ S4 model_case_2(const int scenario,
 
     // get generation data from output
     Rcpp::List gen_data = simOutput["gen_data"];
+    Rcpp::DataFrame edgelist = simOutput["edgeList"];
 
     // parameter list
     Rcpp::List param_list = Rcpp::List::create(
             Named("scenario") = scenario_str,
             Named("generations") = genmax,
+            Named("timesteps") = tmax,
             Named("pop_size") = popsize,
             Named("pop_density") = static_cast<float>(popsize) / landsize,
             Named("item_density") = static_cast<float>(nItems) / landsize,
@@ -245,6 +247,7 @@ S4 model_case_2(const int scenario,
     S4 x("simulation_output");
     x.slot("parameters") = Rcpp::wrap(param_list);
     x.slot("trait_data") = Rcpp::wrap(gen_data);
+    x.slot("edge_list") = Rcpp::wrap(edgelist);
 
     return(x);
 }
