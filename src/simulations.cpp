@@ -74,11 +74,6 @@ Rcpp::List simulation::do_simulation_mechanistic() {
         
         pop.energy = pop.intake;
 
-        // if((gen == 0) | ((gen % (genmax / 10)) == 0) | (gen == genmax - 1)) {
-        //     edgeLists.push_back(pop.pbsn.getNtwkDf());
-        //     Rcpp::Rcout << "gen: " << gen << " --- logged edgelist\n";
-        // }
-
         // log data in the last generation
         if (gen == (genmax - 1)) {
             pop_trait_data = pop.returnPopData();
@@ -102,6 +97,97 @@ Rcpp::List simulation::do_simulation_mechanistic() {
     );
 }
 
+/// function for optimal movement simulation
+Rcpp::List simulation::do_simulation_optimal() {
+
+    unsigned seed = static_cast<unsigned> (std::chrono::system_clock::now().time_since_epoch().count());
+    rng.seed(seed);
+    
+    // prepare landscape and pop
+    food.initResources();
+    food.countAvailable();
+    Rcpp::Rcout << "landscape with " << food.nClusters << " clusters\n";
+
+    pop.setTrait(mSize);
+    Rcpp::Rcout << "pop with " << pop.nAgents << " agents for " << genmax << " gens " << tmax << " timesteps\n";
+
+    // prepare scenario
+    Rcpp::Rcout << "this is scenario " << scenario << ": optimal movement\n";
+
+    // agent random position in first gen
+    pop.initPos(food);
+    // Rcpp::Rcout << "initialised population positions\n";
+    
+    Rcpp::DataFrame edgeList;
+    Rcpp::DataFrame pop_trait_data;
+    // Rcpp::Rcout << "created edge list object\n";
+
+    // go over gens
+    for(int gen = 0; gen < genmax; gen++) {
+
+        food.countAvailable();
+        // Rcpp::Rcout << "food available = " << food.nAvailable << "\n";
+
+        // reset counter and positions
+        pop.counter = std::vector<int> (pop.nAgents, 0);
+        
+        // Rcpp::Rcout << "entering ecological timescale\n";
+
+        // timesteps start here
+        for (size_t t = 0; t < static_cast<size_t>(tmax); t++)
+        {
+            // resources regrow
+            food.regenerate();
+            // Rcpp::Rcout << "food regenerated\n";
+            pop.updateRtree();
+            // Rcpp::Rcout << "updated r tree\n";
+            // movement section
+            pop.move_optimal(food, nThreads);
+            // Rcpp::Rcout << "moved\n";
+
+            // if(gen == (genmax - 1)) {
+            //     mdPost.updateMoveData(pop, t);
+            // }
+            // Rcpp::Rcout << "logged movement data\n";
+
+            // foraging -- split into parallelised picking
+            // and non-parallel exploitation
+            pop.pickForageItem(food, nThreads);
+            pop.doForage(food);
+
+            // count associations --- only in last gen
+            if(gen == (genmax - 1)) {
+                pop.countAssoc(nThreads);
+            }
+            // timestep ends here
+        }
+        
+        pop.energy = pop.intake;
+        
+        // log data in the last generation
+        if (gen == (genmax - 1)) {
+            pop_trait_data = pop.returnPopData();
+            edgeList = pop.pbsn.getNtwkDf();
+        }
+
+        // reproduce
+        pop.Reproduce(food, dispersal, mProb, mSize);
+
+        // generation ends here
+    }
+    // all gens end here
+
+    Rcpp::Rcout << "gen: " << genmax << " --- logged edgelist\n";
+    Rcpp::Rcout << "data prepared\n";
+
+    return Rcpp::List::create(
+        Named("gen_data") = pop_trait_data,
+        Named("edgeList") = edgeList
+        // Named("move_post") = mdPost.getMoveData()
+    );
+}
+
+/// simulation for random movement
 Rcpp::List simulation::do_simulation_random() {
     unsigned seed = static_cast<unsigned> (std::chrono::system_clock::now().time_since_epoch().count());
     rng.seed(seed);
@@ -231,6 +317,10 @@ S4 model_case_2(const int scenario,
         scenario_str = std::string("evolved movement");
         // do the simulation using the simulation class function                        
         simOutput = this_sim.do_simulation_mechanistic();
+    } else if(scenario == 1) {
+        scenario_str = std::string("optimal movement");
+        // do the simulation using the simulation class function                        
+        simOutput = this_sim.do_simulation_optimal();
     }
 
     // get generation data from output
