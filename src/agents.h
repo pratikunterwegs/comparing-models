@@ -40,6 +40,9 @@ public:
         // vectors for agent order
         order(popsize, 1),
         forageItem(popsize, -1),
+        
+        // distance moved
+        moved(popsize, 0.f),
 
         // a network object
         pbsn(popsize)
@@ -120,6 +123,9 @@ public:
     
     // counting proximity based interactions
     void countAssoc(const int nThreads);
+
+    // return population data
+    Rcpp::DataFrame returnPopData();
 };
 
 // a dinky function for distance and passed to catch test
