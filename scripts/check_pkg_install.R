@@ -8,7 +8,7 @@ devtools::document()
 library(ggplot2)
 
 # test case 0
-a = linkmoveecoevo::model_case_2(
+a <- linkmoveecoevo::model_case_2(
   scenario = 0,
   landsize = 60,
   nItems = 1800,
@@ -27,7 +27,7 @@ a = linkmoveecoevo::model_case_2(
 )
 
 # test case 2
-a = linkmoveecoevo::model_case_2(
+a <- linkmoveecoevo::model_case_2(
   scenario = 2,
   landsize = 60,
   nItems = 1800,
@@ -46,7 +46,7 @@ a = linkmoveecoevo::model_case_2(
 )
 
 # test case 1
-a = linkmoveecoevo::model_case_2(
+a <- linkmoveecoevo::model_case_2(
   scenario = 1,
   landsize = 60,
   nItems = 1800,
@@ -67,7 +67,7 @@ a = linkmoveecoevo::model_case_2(
 str(a)
 
 # plot displacement
-ggplot(a@trait_data)+
+ggplot(a@trait_data) +
   geom_segment(
     aes(
       x = x, y = y,
@@ -75,7 +75,7 @@ ggplot(a@trait_data)+
     )
   )
 
-b = make_network(a, 2)
+b <- make_network(a, 2)
 
 plot_network(b) +
   scale_fill_viridis_c()
