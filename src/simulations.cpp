@@ -177,8 +177,10 @@ Rcpp::List simulation::do_simulation_random() {
         Rcpp::Rcout << "now moving randomly!\n";
         pop.move_random(food);
 
-        mdPre.updateMoveData(pop, t);
+        Rcpp::Rcout << "moved randomly!\n";
+        // mdPre.updateMoveData(pop, t);
 
+        Rcpp::Rcout << "updated movement data!\n";
         // foraging -- split into parallelised picking
         // and non-parallel exploitation
         pop.pickForageItem(food, nThreads);
@@ -191,16 +193,16 @@ Rcpp::List simulation::do_simulation_random() {
     pop.energy = pop.intake;
     
     // log population traits and outcomes
-    // gen_data.updateGenData(pop, 1);
+    gen_data.updateGenData(pop, 1);
     edgeList = pop.pbsn.getNtwkDf();
 
     Rcpp::Rcout << "gen: " << 1 << " --- logged edgelist\n";
     Rcpp::Rcout << "data prepared\n";
 
     return Rcpp::List::create(
-        // Named("gen_data") = gen_data.getGenData(),
-        Named("edgeList") = edgeList,
-        Named("move_data") = mdPre.getMoveData()
+        Named("gen_data") = gen_data.getGenData(),
+        Named("edgeList") = edgeList
+        // Named("move_data") = mdPre.getMoveData()
     );
 }
 
@@ -305,7 +307,7 @@ S4 model_case_2(const int scenario,
         );
 
     // create S4 class pathomove output and fill slots
-    S4 x("sim_output");
+    S4 x("simulation_output");
     x.slot("parameters") = Rcpp::wrap(param_list);
     x.slot("generations") = Rcpp::wrap(gen_data["gens"]);
     x.slot("trait_data") = Rcpp::wrap(pop_data);
