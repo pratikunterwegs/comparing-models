@@ -5,9 +5,10 @@
   [![R build status](https://github.com/pratikunterwegs/pathomove/workflows/R-CMD-check/badge.svg)](https://github.com/pratikunterwegs/pathomove/actions)
   [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6331816.svg)](https://doi.org/10.5281/zenodo.6331816)
   [![Codecov test coverage](https://codecov.io/gh/pratikunterwegs/pathomove/branch/main/graph/badge.svg)](https://codecov.io/gh/pratikunterwegs/pathomove?branch=main)
+[![R-CMD-check](https://github.com/pratikunterwegs/move-eco-evo/workflows/R-CMD-check/badge.svg)](https://github.com/pratikunterwegs/move-eco-evo/actions)
 <!-- badges: end -->
 
-This repository holds the source code for the _Pathomove_ simulation, a spatially explicit, individual-based, evolutionary model of the evolution of animal social movement strategies under the risk of pathogen transmission.
+<!-- This repository holds the source code for the _Pathomove_ simulation, a spatially explicit, individual-based, evolutionary model of the evolution of animal social movement strategies under the risk of pathogen transmission.
 
 The model is written by Pratik Gupte, in the Modelling Adaptive Response Mechanisms Group (Weissing Lab) at the Groningen Institute for Evolutionary Life Science, at the University of Groningen.
 
@@ -285,4 +286,4 @@ Please cite the simulation data as:
   doi          = {10.5281/zenodo.6331757},
   url          = {https://doi.org/10.5281/zenodo.6331757}
 }
-```
+``` -->
