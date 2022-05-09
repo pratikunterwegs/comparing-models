@@ -92,7 +92,7 @@ Rcpp::List simulation::do_simulation_mechanistic() {
 
     return Rcpp::List::create(
         Named("gen_data") = pop_trait_data,
-        Named("edgeList") = edgeList
+        Named("edge_list") = edgeList
         // Named("move_post") = mdPost.getMoveData()
     );
 }
@@ -182,7 +182,7 @@ Rcpp::List simulation::do_simulation_optimal() {
 
     return Rcpp::List::create(
         Named("gen_data") = pop_trait_data,
-        Named("edgeList") = edgeList
+        Named("edge_list") = edgeList
         // Named("move_post") = mdPost.getMoveData()
     );
 }
@@ -246,7 +246,7 @@ Rcpp::List simulation::do_simulation_random() {
 
     return Rcpp::List::create(
         Named("gen_data") = pop.returnPopData(),
-        Named("edgeList") = edgeList
+        Named("edge_list") = edgeList
         // Named("move_data") = mdPre.getMoveData()
     );
 }
@@ -325,7 +325,7 @@ S4 model_case_2(const int scenario,
 
     // get generation data from output
     Rcpp::List gen_data = simOutput["gen_data"];
-    Rcpp::DataFrame edgelist = simOutput["edgeList"];
+    Rcpp::DataFrame this_edgelist = simOutput["edge_list"];
 
     // parameter list
     Rcpp::List param_list = Rcpp::List::create(
@@ -342,7 +342,7 @@ S4 model_case_2(const int scenario,
     S4 x("simulation_output");
     x.slot("parameters") = Rcpp::wrap(param_list);
     x.slot("trait_data") = Rcpp::wrap(gen_data);
-    x.slot("edge_list") = Rcpp::wrap(edgelist);
+    x.slot("edge_list") = Rcpp::wrap(this_edgelist);
 
     return(x);
 }
