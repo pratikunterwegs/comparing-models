@@ -399,52 +399,44 @@ void Population::move_random(const Resources &food) {
     
     // what increment for 3 samples in a circle around the agent
     float increment = twopi / n_samples;
-    float angle = 0.f;
-    // for this increment what angles to sample at
-    std::vector<float> sample_angles (static_cast<int>(n_samples), 0.f);
-    for (int i_ = 0; i_ < static_cast<int>(n_samples); i_++)
-    {
-        sample_angles[i_] = angle;
-        angle += increment;
-    }
-
-    std::uniform_int_distribution<int> direction(0, n_samples);
+    
+    std::uniform_int_distribution<int> direction(0, static_cast<int>(n_samples)-1);
 
     for (int i = 0; i < nAgents; ++i) {
-        int id = order[i];
-        if (counter[id] > 0) {
-            counter[id] --;
+        if (counter[i] > 0) {
+            counter[i] --;
         }
         else {
 
             int this_direction = direction(rng);
+            Rcpp::Rcout << "direction = " << this_direction << "\n";
             if (this_direction == 0) {
                 // no move
             }
             else {
-                float t1_ = static_cast<float>(cos(sample_angles[this_direction]));
-                float t2_ = static_cast<float>(sin(sample_angles[this_direction]));
+                float t1_ = static_cast<float>(cos(static_cast<float>(this_direction) * increment));
+                float t2_ = static_cast<float>(sin(static_cast<float>(this_direction) * increment));
 
-                float newX = coordX[id] + (range_perception * t1_);
-                float newY = coordY[id] + (range_perception * t2_);
+                // float newX = coordX[i] + (range_perception * t1_);
+                // float newY = coordY[i] + (range_perception * t2_);
 
-                // handle wrapping
-                // crudely wrap sampling location
-                if((newX > food.dSize) | (newX < 0.f)) {
-                    newX = std::fabs(std::fmod(newX, food.dSize));
-                }
-                if((newY > food.dSize) | (newY < 0.f)) {
-                    newY = std::fabs(std::fmod(newY, food.dSize));
-                }
+                // // handle wrapping
+                // // crudely wrap sampling location
+                // if((newX > food.dSize) | (newX < 0.f)) {
+                //     newX = std::fabs(std::fmod(newX, food.dSize));
+                // }
+                // if((newY > food.dSize) | (newY < 0.f)) {
+                //     newY = std::fabs(std::fmod(newY, food.dSize));
+                // }
 
-                assert(newX < food.dSize && newX > 0.f);
-                assert(newY < food.dSize && newY > 0.f);
+                // assert(newX < food.dSize && newX > 0.f);
+                // assert(newY < food.dSize && newY > 0.f);
 
                 // distance to be moved
-                moved[id] += range_perception;
+                // moved[i] += range_perception;
 
                 // set locations
-                coordX[id] = newX; coordY[id] = newY;
+                // coordX[i] = newX; coordY[i] = newY;
             }
         }
     }
