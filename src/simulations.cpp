@@ -323,10 +323,6 @@ S4 model_case_2(const int scenario,
         simOutput = this_sim.do_simulation_optimal();
     }
 
-    // get generation data from output
-    Rcpp::List gen_data = simOutput["gen_data"];
-    Rcpp::DataFrame this_edgelist = simOutput["edge_list"];
-
     // parameter list
     Rcpp::List param_list = Rcpp::List::create(
             Named("scenario") = scenario_str,
@@ -341,8 +337,8 @@ S4 model_case_2(const int scenario,
     // create S4 class pathomove output and fill slots
     S4 x("simulation_output");
     x.slot("parameters") = Rcpp::wrap(param_list);
-    x.slot("trait_data") = Rcpp::wrap(gen_data);
-    x.slot("edge_list") = Rcpp::wrap(this_edgelist);
+    x.slot("trait_data") = Rcpp::wrap(simOutput["gen_data"]);
+    x.slot("edge_list") = Rcpp::wrap(simOutput["edge_list"]);
 
     return(x);
 }
