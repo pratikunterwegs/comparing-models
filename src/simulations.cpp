@@ -221,7 +221,8 @@ Rcpp::List simulation::do_simulation_random() {
 // [[Rcpp::export]]
 S4 model_case_2(const int scenario,
                 const int popsize,
-                const int nItems, const float landsize,
+                const int nItems, 
+                const float landsize,
                 const int nClusters,
                 const float clusterSpread,
                 const int tmax,
@@ -250,33 +251,9 @@ S4 model_case_2(const int scenario,
         // do the simulation using the simulation class function                        
         simOutput = this_sim.do_simulation_random();
     }
-    // switch (scenario)
-    // {
-    //     case 0:
-    //         scenario_str = std::string("random movement");
-    //         // do the simulation using the simulation class function                        
-    //         simOutput = this_sim.do_simulation_random();
-    //         break;
-    //     case 1:
-    //         scenario_str = std::string("optimal movement");
-    //         // do the simulation using the simulation class function                        
-    //         // simOutput = this_sim.do_simulation();
-    //         break;
-    //     case 2:
-    //         scenario_str = std::string("evolved movement");
-    //         // do the simulation using the simulation class function                        
-    //         simOutput = this_sim.do_simulation_mechanistic();
-    //         break;
-        
-    //     default:
-    //         scenario_str = std::string("unknown scenario");
-    //         break;
-    // }
 
     // get generation data from output
     Rcpp::List gen_data = simOutput["gen_data"];
-    // make list of dataframes of population traits
-    Rcpp::List pop_data = gen_data["pop_data"];
 
     // parameter list
     Rcpp::List param_list = Rcpp::List::create(
@@ -291,8 +268,7 @@ S4 model_case_2(const int scenario,
     // create S4 class pathomove output and fill slots
     S4 x("simulation_output");
     x.slot("parameters") = Rcpp::wrap(param_list);
-    x.slot("generations") = Rcpp::wrap(gen_data["gens"]);
-    x.slot("trait_data") = Rcpp::wrap(pop_data);
+    x.slot("trait_data") = Rcpp::wrap(gen_data);
 
     return(x);
 }
