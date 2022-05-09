@@ -136,23 +136,7 @@ Rcpp::List simulation::do_simulation_random() {
 
     // prepare scenario
     // return scenario as string
-    std::string scenario_str;
-    switch (scenario)
-    {
-        case 0:
-            Rcpp::Rcout << "this is scenario " << scenario << ": random movement\n";
-            break;
-        case 1:
-            Rcpp::Rcout << "this is scenario " << scenario << ": optimal movement\n";
-            break;
-        case 2:
-            Rcpp::Rcout << "this is scenario " << scenario << ": evolved movement\n";
-            break;
-        
-        default:
-            Rcpp::Rcout << "unknown scenario\n";
-            break;
-    }
+    Rcpp::Rcout << "this is scenario " << scenario << ": random movement\n";
 
     // agent random position in first gen
     pop.initPos(food);
@@ -192,16 +176,14 @@ Rcpp::List simulation::do_simulation_random() {
     }
     pop.energy = pop.intake;
     
-    // log population traits and outcomes
-    gen_data.updateGenData(pop, 1);
-    edgeList = pop.pbsn.getNtwkDf();
+    // edgeList = pop.pbsn.getNtwkDf();
 
     Rcpp::Rcout << "gen: " << 1 << " --- logged edgelist\n";
     Rcpp::Rcout << "data prepared\n";
 
     return Rcpp::List::create(
-        Named("gen_data") = gen_data.getGenData(),
-        Named("edgeList") = edgeList
+        Named("gen_data") = pop.returnPopData()
+        // Named("edgeList") = edgeList
         // Named("move_data") = mdPre.getMoveData()
     );
 }
