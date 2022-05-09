@@ -261,13 +261,8 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
                             sampleX = coordX[id] + (range_perception * t1_);
                             sampleY = coordY[id] + (range_perception * t2_);
 
-                            // crudely wrap sampling location
-                            if((sampleX > food.dSize) | (sampleX < 0.f)) {
-                                sampleX = std::fabs(std::fmod(sampleX, food.dSize));
-                            }
-                            if((sampleY > food.dSize) | (sampleY < 0.f)) {
-                                sampleY = std::fabs(std::fmod(sampleY, food.dSize));
-                            }
+                            sampleX = wrapLoc(sampleX, food.dSize);
+                            sampleY = wrapLoc(sampleY, food.dSize);
 
                             // count food at sample locations if any available
                             if(food.nAvailable > 0) {
@@ -290,13 +285,8 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
                                 newX = coordX[id] + (range_perception * t1_);
                                 newY = coordY[id] + (range_perception * t2_);
 
-                                // crudely wrap MOVEMENT location
-                                if((newX > food.dSize) | (newX < 0.f)) {
-                                    newX = std::fabs(std::fmod(newX, food.dSize));
-                                }
-                                if((newY > food.dSize) | (newY < 0.f)) {
-                                    newY = std::fabs(std::fmod(newY, food.dSize));
-                                }
+                                newX = wrapLoc(newX, food.dSize);
+                                newY = wrapLoc(newY, food.dSize);
 
                                 assert(newX < food.dSize && newX > 0.f);
                                 assert(newY < food.dSize && newY > 0.f);
@@ -351,12 +341,8 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
                     sampleY = coordY[id] + (range_perception * t2_);
 
                     // crudely wrap sampling location
-                    if((sampleX > food.dSize) | (sampleX < 0.f)) {
-                        sampleX = std::fabs(std::fmod(sampleX, food.dSize));
-                    }
-                    if((sampleY > food.dSize) | (sampleY < 0.f)) {
-                        sampleY = std::fabs(std::fmod(sampleY, food.dSize));
-                    }
+                    sampleX = wrapLoc(sampleX, food.dSize);
+                    sampleY = wrapLoc(sampleY, food.dSize);
 
                     // count food at sample locations if any available
                     if(food.nAvailable > 0) {
@@ -380,12 +366,8 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
                         newY = coordY[id] + (range_perception * t2_);
 
                         // crudely wrap MOVEMENT location
-                        if((newX > food.dSize) | (newX < 0.f)) {
-                            newX = std::fabs(std::fmod(newX, food.dSize));
-                        }
-                        if((newY > food.dSize) | (newY < 0.f)) {
-                            newY = std::fabs(std::fmod(newY, food.dSize));
-                        }
+                        newX = wrapLoc(newX, food.dSize);
+                        newY = wrapLoc(newY, food.dSize);
 
                         assert(newX < food.dSize && newX > 0.f);
                         assert(newY < food.dSize && newY > 0.f);
@@ -399,9 +381,7 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
                 coordX[id] = newX; coordY[id] = newY;
             }
         }
-
     }
-    
 }
 
 // function to move randomly
@@ -420,7 +400,7 @@ void Population::move_random(const Resources &food) {
         else {
 
             int this_direction = direction(rng);
-            Rcpp::Rcout << "direction = " << this_direction << "\n";
+            // Rcpp::Rcout << "direction = " << this_direction << "\n";
             if (this_direction == 0) {
                 // no move
             }
@@ -432,13 +412,9 @@ void Population::move_random(const Resources &food) {
                 float newY = coordY[i] + (range_perception * t2_);
 
                 // handle wrapping
-                // crudely wrap sampling location
-                if((newX > food.dSize) | (newX < 0.f)) {
-                    newX = std::fabs(std::fmod(newX, food.dSize));
-                }
-                if((newY > food.dSize) | (newY < 0.f)) {
-                    newY = std::fabs(std::fmod(newY, food.dSize));
-                }
+                // crudely wrap sampling location --- don't really trust fmod
+                newX = wrapLoc(newX, food.dSize);
+                newY = wrapLoc(newY, food.dSize);
 
                 // distance to be moved
                 moved[i] += range_perception;
@@ -515,12 +491,8 @@ void Population::move_optimal(const Resources &food, const int nThreads) {
                 sampleY = coordY[id] + (range_perception * t2_);
 
                 // crudely wrap sampling location
-                if((sampleX > food.dSize) | (sampleX < 0.f)) {
-                    sampleX = std::fabs(std::fmod(sampleX, food.dSize));
-                }
-                if((sampleY > food.dSize) | (sampleY < 0.f)) {
-                    sampleY = std::fabs(std::fmod(sampleY, food.dSize));
-                }
+                sampleX = wrapLoc(sampleX, food.dSize);
+                sampleY = wrapLoc(sampleY, food.dSize);
 
                 // count food at sample locations if any available
                 if(food.nAvailable > 0) {
@@ -543,12 +515,8 @@ void Population::move_optimal(const Resources &food, const int nThreads) {
                     newY = coordY[id] + (range_perception * t2_);
 
                     // crudely wrap MOVEMENT location
-                    if((newX > food.dSize) | (newX < 0.f)) {
-                        newX = std::fabs(std::fmod(newX, food.dSize));
-                    }
-                    if((newY > food.dSize) | (newY < 0.f)) {
-                        newY = std::fabs(std::fmod(newY, food.dSize));
-                    }
+                    newX = wrapLoc(newX, food.dSize);
+                    newY = wrapLoc(newY, food.dSize);
 
                     assert(newX < food.dSize && newX > 0.f);
                     assert(newY < food.dSize && newY > 0.f);
