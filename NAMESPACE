@@ -1,0 +1,7 @@
+
+useDynLib(linkmoveecoevo, .registration=TRUE)
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
+importFrom(RcppParallel, RcppParallelLibs)
+
+importFrom(data.table, .N, .I, ':=')
