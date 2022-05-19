@@ -50,8 +50,6 @@ data_random <- lapply(seq(20), function(x) {
     nThreads = 1
   )
 })
-
-sapply(data_random, class)
 ```
 
 ```{r}
@@ -112,8 +110,6 @@ data_random <- lapply(seq(20), function(x) {
     nThreads = 1
   )
 })
-
-sapply(data_random, class)
 ```
 
 ```{r}
@@ -176,8 +172,6 @@ data_optimal <- lapply(seq(20), function(x) {
     nThreads = 1
   )
 })
-
-sapply(data_optimal, class)
 ```
 
 ```{r}
@@ -238,8 +232,6 @@ data_optimal <- lapply(seq(20), function(x) {
     nThreads = 1
   )
 })
-
-sapply(data_optimal, class)
 ```
 
 ```{r}
