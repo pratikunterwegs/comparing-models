@@ -153,11 +153,13 @@ ggplot(data_optimal_intake)+
     )
 ```
 
-## Evolved movement rules
+## Evolved movement strategies
+
+### Evolved strategies, patchy resource landscapes
 
 ```{r}
 # run scenarios
-data_evolved <- lapply(seq(20), function(x) {
+data_evolved <- lapply(seq(1), function(x) {
   ecoevomove2::model_case_2(
     scenario = 2,
     landsize = 30,
@@ -165,21 +167,18 @@ data_evolved <- lapply(seq(20), function(x) {
     clusterSpread = 0.5,
     nClusters = 30,
     regen_time = 100,
-    tmax = 100,
+    tmax = 400,
     handling_time = 5,
     popsize = 200,
-    genmax = 200,
-    dispersal = 10,
-    range_perception = 1.0,
+    genmax = 100,
+    dispersal = 2,
+    range_perception = 1,
     mProb = 0.01,
     mSize = 0.01,
     nThreads = 2
   )
 })
-
-sapply(data_evolved, class)
 ```
-
 
 ```{r}
 # examine intake in evolved movement
@@ -195,14 +194,27 @@ data_evolved_intake = Map(
 )
 
 data_evolved_intake = rbindlist(data_evolved_intake)
+data_evolved_intake = get_social_strategy(data_evolved_intake)
 
-# save trait data
+# add details
+data_evolved_intake[, landscape := "patchy"]
+data_evolved_intake[, type := "evolved"]
+
+save trait data
 fwrite(
     data_evolved_intake,
-    file = "inst/data/data_traits_evolved.csv"
+    file = "inst/data/data_traits_evolved_patchy.csv"
 )
 ```
 
+Networks from evolved movement strategies on patchy landscapes.
+
+```{r}
+networks_evolved = lapply(data_evolved, make_network, weight_threshold = 3)
+
+# save networks
+save(networks_evolved, file = "inst/data/networks_evolved_patchy.Rds")
+```
 ```{r}
 # data plot
 ggplot(data_evolved_intake)+
