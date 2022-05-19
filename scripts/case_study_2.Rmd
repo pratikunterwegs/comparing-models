@@ -5,23 +5,42 @@ library(data.table)
 library(ggplot2)
 ```
 
+## Demonstrate landscape
+
+```{r}
+l = ecoevomove2::get_test_landscape(
+    nItems = 450,
+    landsize = 30,
+    nClusters = 30,
+    clusterSpread = 0.5,
+    regen_time = 100
+)
+
+ggplot(l)+
+    geom_point(
+        aes(
+            x, y
+        )
+    )
+```
+
 ## Random movement
 
 ```{r}
 # run scenarios
 data_random <- lapply(seq(20), function(x) {
-  linkmoveecoevo::model_case_2(
+  ecoevomove2::model_case_2(
     scenario = 0,
-    landsize = 60,
-    nItems = 1800,
-    clusterSpread = 1.0,
-    nClusters = 100,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 30,
     regen_time = 100,
     tmax = 400,
     handling_time = 5,
-    popsize = 500,
+    popsize = 200,
     genmax = 1,
-    dispersal = 3,
+    dispersal = 10,
     range_perception = 1.0,
     mProb = 0.01,
     mSize = 0.01,
@@ -35,15 +54,30 @@ sapply(data_random, class)
 ```{r}
 # examine intake in random movement
 data_random_intake = lapply(data_random, slot, "trait_data")
+
+# assign replicate
+data_random_intake = Map(
+    data_random_intake, seq(length(data_random_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
 data_random_intake = rbindlist(data_random_intake)
+
+# save trait data
+fwrite(
+    data_random_intake,
+    file = "inst/data/data_traits_random.csv"
+)
 ```
 
 ```{r}
 # data plot
 ggplot(data_random_intake)+
     geom_jitter(
-        aes(moved, assoc),
-        alpha = 0.2
+        aes(moved, assoc, col = replicate)
     )
 
 ggplot(data_random_intake)+
@@ -59,43 +93,125 @@ ggplot(data_random_intake)+
 ```{r}
 # run scenarios
 data_optimal <- lapply(seq(20), function(x) {
-  linkmoveecoevo::model_case_2(
+  ecoevomove2::model_case_2(
     scenario = 1,
-    landsize = 60,
-    nItems = 1800,
-    clusterSpread = 1.0,
-    nClusters = 100,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 30,
     regen_time = 100,
     tmax = 400,
     handling_time = 5,
-    popsize = 500,
+    popsize = 200,
     genmax = 1,
-    dispersal = 3,
+    dispersal = 10,
     range_perception = 1.0,
     mProb = 0.01,
     mSize = 0.01,
-    nThreads = 1
+    nThreads = 2
   )
 })
 
 sapply(data_optimal, class)
 ```
 
+
 ```{r}
 # examine intake in optimal movement
 data_optimal_intake = lapply(data_optimal, slot, "trait_data")
+
+# assign replicate
+data_optimal_intake = Map(
+    data_optimal_intake, seq(length(data_optimal_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
 data_optimal_intake = rbindlist(data_optimal_intake)
+
+# save trait data
+fwrite(
+    data_optimal_intake,
+    file = "inst/data/data_traits_optimal.csv"
+)
 ```
 
 ```{r}
 # data plot
 ggplot(data_optimal_intake)+
     geom_jitter(
+        aes(moved, assoc)
+    )
+
+ggplot(data_optimal_intake)+
+    geom_histogram(
+        aes(
+            moved
+        )
+    )
+```
+
+## Evolved movement rules
+
+```{r}
+# run scenarios
+data_evolved <- lapply(seq(20), function(x) {
+  ecoevomove2::model_case_2(
+    scenario = 2,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 30,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 200,
+    genmax = 200,
+    dispersal = 10,
+    range_perception = 1.0,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 2
+  )
+})
+
+sapply(data_evolved, class)
+```
+
+
+```{r}
+# examine intake in evolved movement
+data_evolved_intake = lapply(data_evolved, slot, "trait_data")
+
+# assign replicate
+data_evolved_intake = Map(
+    data_evolved_intake, seq(length(data_evolved_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
+data_evolved_intake = rbindlist(data_evolved_intake)
+
+# save trait data
+fwrite(
+    data_evolved_intake,
+    file = "inst/data/data_traits_evolved.csv"
+)
+```
+
+```{r}
+# data plot
+ggplot(data_evolved_intake)+
+    geom_jitter(
         aes(moved, assoc),
         alpha = 0.2
     )
 
-ggplot(data_optimal_intake)+
+ggplot(data_evolved_intake)+
     geom_histogram(
         aes(
             moved
