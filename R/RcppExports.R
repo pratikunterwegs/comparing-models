@@ -10,7 +10,7 @@
 #' @param regen_time Regeneration time, in timesteps.
 #' @return A data frame of the evolved population traits.
 get_test_landscape <- function(nItems, landsize, nClusters, clusterSpread, regen_time) {
-    .Call(`_linkmoveecoevo_get_test_landscape`, nItems, landsize, nClusters, clusterSpread, regen_time)
+    .Call(`_ecoevomove2_get_test_landscape`, nItems, landsize, nClusters, clusterSpread, regen_time)
 }
 
 #' Runs an exploitation competition simulation returning structured output.
@@ -44,6 +44,6 @@ get_test_landscape <- function(nItems, landsize, nClusters, clusterSpread, regen
 #' parameter of a Cauchy distribution. 
 #' @return An S4 class, `pathomove_output`, with simulation outcomes.
 model_case_2 <- function(scenario, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize) {
-    .Call(`_linkmoveecoevo_model_case_2`, scenario, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize)
+    .Call(`_ecoevomove2_model_case_2`, scenario, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize)
 }
 
