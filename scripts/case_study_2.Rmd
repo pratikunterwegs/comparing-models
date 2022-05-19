@@ -316,7 +316,7 @@ data_evolved_intake = get_social_strategy(data_evolved_intake)
 data_evolved_intake[, landscape := "patchy"]
 data_evolved_intake[, type := "evolved"]
 
-save trait data
+# save trait data
 fwrite(
     data_evolved_intake,
     file = "inst/data/data_traits_evolved_patchy.csv"
@@ -377,7 +377,7 @@ data_evolved_intake = get_social_strategy(data_evolved_intake)
 data_evolved_intake[, landscape := "homog"]
 data_evolved_intake[, type := "evolved"]
 
-save trait data
+# save trait data
 fwrite(
     data_evolved_intake,
     file = "inst/data/data_traits_evolved_homog.csv"
