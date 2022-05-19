@@ -215,18 +215,64 @@ networks_evolved = lapply(data_evolved, make_network, weight_threshold = 3)
 # save networks
 save(networks_evolved, file = "inst/data/networks_evolved_patchy.Rds")
 ```
-```{r}
-# data plot
-ggplot(data_evolved_intake)+
-    geom_jitter(
-        aes(moved, assoc),
-        alpha = 0.2
-    )
 
-ggplot(data_evolved_intake)+
-    geom_histogram(
-        aes(
-            moved
-        )
-    )
+### Evolved strategies, homogeneous resource landscapes
+
+```{r}
+# run scenarios
+data_evolved <- lapply(seq(1), function(x) {
+  ecoevomove2::model_case_2(
+    scenario = 2,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 90,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 200,
+    genmax = 100,
+    dispersal = 2,
+    range_perception = 1,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 2
+  )
+})
+```
+
+```{r}
+# examine intake in evolved movement
+data_evolved_intake = lapply(data_evolved, slot, "trait_data")
+
+# assign replicate
+data_evolved_intake = Map(
+    data_evolved_intake, seq(length(data_evolved_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
+data_evolved_intake = rbindlist(data_evolved_intake)
+data_evolved_intake = get_social_strategy(data_evolved_intake)
+
+# add details
+data_evolved_intake[, landscape := "homog"]
+data_evolved_intake[, type := "evolved"]
+
+save trait data
+fwrite(
+    data_evolved_intake,
+    file = "inst/data/data_traits_evolved_homog.csv"
+)
+```
+
+Networks from evolved movement strategies on homog landscapes.
+
+```{r}
+networks_evolved = lapply(data_evolved, make_network, weight_threshold = 3)
+
+# save networks
+save(networks_evolved, file = "inst/data/networks_evolved_homog.Rds")
 ```
