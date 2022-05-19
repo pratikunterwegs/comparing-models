@@ -165,7 +165,7 @@ data_evolved <- lapply(seq(20), function(x) {
     clusterSpread = 0.5,
     nClusters = 30,
     regen_time = 100,
-    tmax = 400,
+    tmax = 100,
     handling_time = 5,
     popsize = 200,
     genmax = 200,
