@@ -275,7 +275,7 @@ save(networks_optimal, file = "inst/data/networks_optimal_homog.Rds")
 
 ```{r}
 # run scenarios
-data_evolved <- lapply(seq(1), function(x) {
+data_evolved <- lapply(seq(20), function(x) {
   ecoevomove2::model_case_2(
     scenario = 2,
     landsize = 30,
@@ -336,7 +336,7 @@ save(networks_evolved, file = "inst/data/networks_evolved_patchy.Rds")
 
 ```{r}
 # run scenarios
-data_evolved <- lapply(seq(1), function(x) {
+data_evolved <- lapply(seq(20), function(x) {
   ecoevomove2::model_case_2(
     scenario = 2,
     landsize = 30,
