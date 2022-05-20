@@ -33,7 +33,7 @@ trait_data = lapply(trait_data, function(df) {
     df[, social_strat := "none"]
   }
   if(!"dispersal" %in% colnames(df)) {
-    df[, dispersal := "local"]
+    df[, dispersal := fifelse(type == "evolved", "local", "global")]
   }
   
   df[, c("intake", "energy", "assoc", "moved", "replicate",
@@ -42,36 +42,79 @@ trait_data = lapply(trait_data, function(df) {
 
 # get as bound df
 trait_data = rbindlist(trait_data)
+
+# set levels
+trait_data[, type := factor(
+  type, levels = c("random", "optimal", "evolved")
+)]
 ```
 
-## Examine mean intake
+## Intake
+
+Prepare plot for intake or harvesting.
 
 ```{r}
-ggplot(trait_data)+
+ggplot(trait_data[landscape == "patchy" & dispersal == "global"])+
   geom_boxplot(
     aes(
       type, intake
     )
-  )+
-  facet_grid(
-    cols = vars(landscape)
   )
 ```
 
-## Examine distance moved and associations
+## Distance moved
 
 ```{r}
-ggplot(trait_data)+
-  geom_point(
+ggplot(trait_data[landscape == "patchy" & dispersal == "global"])+
+  geom_boxplot(
     aes(
-      moved, assoc,
-      col = social_strat
+      type, moved
+    )
+  )+
+  facet_grid(
+    cols = vars(dispersal)
+  )
+```
+
+## Associations
+
+```{r}
+ggplot(trait_data[landscape == "patchy" & dispersal == "global"])+
+  geom_boxplot(
+    aes(
+      type, assoc
     )
   )+
   scale_y_sqrt()+
   facet_grid(
-    rows = vars(type),
-    cols = vars(landscape)
+    cols = vars(dispersal)
+  )
+```
+
+## Disease spread
+
+Load SIR model data.
+
+```{r}
+data_sir = fread("inst/data/data_sir_thr_12.csv")
+
+# examine only patchy landscapes with global dispersal
+data_sir = data_sir[landscape == "patchy" & dispersal == "global"]
+
+# set factor levels
+data_sir[, sim_type := factor(sim_type, 
+                              levels = c("random", "optimal", "evolved"))]
+```
+
+```{r}
+ggplot(data_sir[time < 9 & class == "NI"])+
+  stat_summary(
+    aes(
+      time, mean
+    )
+  )+
+  facet_grid(
+    cols = vars(sim_type)
   )
 ```
 
