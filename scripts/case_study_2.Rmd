@@ -1,3 +1,9 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# Run models for case study 2
 
 ```{r}
 # load packages
@@ -84,7 +90,7 @@ Networks from random walk on patchy landscape.
 networks_random = lapply(data_random, make_network, weight_threshold = 3)
 
 # save networks
-save(networks_random, file = "inst/data/networks_random_patchy.Rds")
+saveRDS(networks_random, file = "inst/data/networks_random_patchy.Rds")
 ```
 
 ### Random walks, homogeneous resource landscapes
@@ -144,7 +150,7 @@ Networks from random walk on homogeneous landscape.
 networks_random = lapply(data_random, make_network, weight_threshold = 3)
 
 # save networks
-save(networks_random, file = "inst/data/networks_random_homog.Rds")
+saveRDS(networks_random, file = "inst/data/networks_random_homog.Rds")
 ```
 
 ## Optimal movement
@@ -206,7 +212,7 @@ Networks from optimal movement strategies on patchy landscapes.
 networks_optimal = lapply(data_optimal, make_network, weight_threshold = 3)
 
 # save networks
-save(networks_optimal, file = "inst/data/networks_optimal_patchy.Rds")
+saveRDS(networks_optimal, file = "inst/data/networks_optimal_patchy.Rds")
 ```
 
 ### Optimal movement, homogeneous resource landscapes
@@ -266,7 +272,7 @@ Networks from optimal movement strategies on homogeneous landscapes.
 networks_optimal = lapply(data_optimal, make_network, weight_threshold = 3)
 
 # save networks
-save(networks_optimal, file = "inst/data/networks_optimal_homog.Rds")
+saveRDS(networks_optimal, file = "inst/data/networks_optimal_homog.Rds")
 ```
 
 ## Evolved movement strategies
@@ -329,7 +335,7 @@ Networks from evolved movement strategies on patchy landscapes.
 networks_evolved = lapply(data_evolved, make_network, weight_threshold = 3)
 
 # save networks
-save(networks_evolved, file = "inst/data/networks_evolved_patchy.Rds")
+saveRDS(networks_evolved, file = "inst/data/networks_evolved_patchy.Rds")
 ```
 
 ### Evolved strategies, homogeneous resource landscapes
@@ -390,5 +396,5 @@ Networks from evolved movement strategies on homog landscapes.
 networks_evolved = lapply(data_evolved, make_network, weight_threshold = 3)
 
 # save networks
-save(networks_evolved, file = "inst/data/networks_evolved_homog.Rds")
+saveRDS(networks_evolved, file = "inst/data/networks_evolved_homog.Rds")
 ```
