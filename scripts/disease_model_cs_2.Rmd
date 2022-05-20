@@ -22,7 +22,7 @@ library(ggplot2)
 # disease parameters
 beta = c(2)
 gamma = c(1)
-threshold = c(6)
+threshold = c(12)
 ```
 
 ## Load saved networks
@@ -30,7 +30,7 @@ threshold = c(6)
 ```{r}
 network_files = list.files(
   path = "inst/data/",
-  pattern = "networks", 
+  pattern = "networks",
   full.names = TRUE
 )
 ```
@@ -45,9 +45,10 @@ data_sir_models = Map(
   f = function(file) {
     
     # detect sim type and landscape type
-    sim_type = stringr::str_extract(file, "(evolved)|(optimal)|(random)")
+    type = stringr::str_extract(file, "(evolved)|(optimal)|(random)")
     landscape = stringr::str_extract(file, "(patchy)|(homog)")
     dispersal = fifelse(stringr::str_detect(file, "global"), "global", "local")
+    dispersal = fifelse(type == "evolved", dispersal, "global")
     
     # load networks
     data_nt = readRDS(file)
@@ -80,8 +81,8 @@ data_sir_models = Map(
     
     # bind all rows
     sir_data = rbindlist(sir_data)
-    sir_data[, c("sim_type", "landscape", "dispersal") := list(
-      sim_type, landscape, dispersal
+    sir_data[, c("type", "landscape", "dispersal") := list(
+      type, landscape, dispersal
     )][]
     
   }
@@ -91,14 +92,14 @@ data_sir_models = Map(
 data_sir_models = rbindlist(data_sir_models)
 fwrite(
   data_sir_models,
-  file = "inst/data/data_sir_thr_6.csv"
+  file = "inst/data/data_sir_thr_12.csv"
 )
 ```
 
 Sanity check.
 
 ```{r}
-ggplot(data_sir_models[time < 9])+
+ggplot(data_sir_models[time < 9 & landscape == "patchy"])+
   stat_summary(
     aes(
       time, mean,
@@ -114,8 +115,7 @@ ggplot(data_sir_models[time < 9])+
   #   )
   # )+
   facet_grid(
-    rows = vars(sim_type),
-    cols = vars(landscape)
+    rows = vars(type),
+    cols = vars(dispersal)
   )
 ```
-
