@@ -12,6 +12,7 @@ library(data.table)
 library(ggplot2)
 library(scico)
 library(patchwork)
+library(ggraph)
 ```
 
 Load trait data.
@@ -281,6 +282,221 @@ ggsave(
 ## Networks
 
 ```{r}
+# read networks
+network_files = list.files(
+  path = "inst/data/",
+  pattern = "networks",
+  full.names = TRUE
+)
 
+# subset for patchy landscapes with global dispersal
+network_files = network_files[grep("patchy", network_files)][-1]
+
+# read networks
+networks = lapply(network_files, readRDS)
+names(networks) = c("evolved", "optimal", "random")
 ```
 
+```{r}
+threshold = 12
+
+# process networks
+networks = lapply(networks, function(le) {
+  lapply(le, function(g) {
+    g = g %>% 
+      activate(edges) %>% 
+      filter(weight > threshold) %>% 
+      activate(nodes)
+    
+    g = g %>% 
+      mutate(
+        cent_degree = tidygraph::centrality_degree()
+      )
+  })
+})
+```
+
+### Random walk network
+
+```{r}
+p_ran_net =
+ggraph(
+  networks[["random"]][[7]], 
+  x = xn, y = yn
+) +
+  geom_edge_fan(
+    edge_width = 0.2,
+    edge_colour = "grey",
+    aes(
+      edge_alpha = weight
+    ),
+    show.legend = FALSE
+  )+
+  geom_node_point(
+    aes(
+      fill = cent_degree / 200,
+      size = assoc
+    ),
+    shape = 21
+  )+
+  scale_fill_scico(
+    palette = "hawaii",
+    direction = -1,
+    limits = c(0, 0.5),
+    labels = scales::percent,
+    breaks = c(0, 0.25, 0.5),
+    name = "Degree"
+  )+
+  scale_edge_alpha(
+    range = c(0.3, 1)
+  )+
+  coord_fixed(
+    xlim = c(0, 30),
+    ylim = c(0, 30)
+  )+
+  ggraph::theme_graph(
+    background = "white"
+  )+
+  theme(
+    legend.position = "top",
+    legend.key.height = unit(2, "mm"),
+    legend.title = element_text(vjust = 1)
+  )+
+  guides(
+    size = "none"
+  )
+
+ggsave(
+  p_ran_net,
+  filename = "figures/fig_network_random.png"
+)
+```
+
+### Optimal movement network
+
+```{r}
+p_opt_net =
+ggraph(
+  networks[["optimal"]][[7]], 
+  x = xn, y = yn
+) +
+  geom_edge_fan(
+    edge_width = 0.2,
+    edge_colour = "grey",
+    aes(
+      edge_alpha = weight
+    ),
+    show.legend = FALSE
+  )+
+  geom_node_point(
+    aes(
+      fill = cent_degree / 200,
+      size = assoc
+    ),
+    shape = 21
+  )+
+  scale_fill_scico(
+    palette = "hawaii",
+    direction = -1,
+    limits = c(0, 0.5),
+    labels = scales::percent,
+    breaks = c(0, 0.25, 0.5),
+    name = "Degree"
+  )+
+  scale_edge_alpha(
+    range = c(0.3, 1)
+  )+
+  coord_fixed(
+    xlim = c(0, 30),
+    ylim = c(0, 30)
+  )+
+  ggraph::theme_graph(
+    background = "white"
+  )+
+  theme(
+    legend.position = "top",
+    legend.key.height = unit(2, "mm"),
+    legend.title = element_text(vjust = 1)
+  )+
+  guides(
+    size = "none"
+  )
+
+ggsave(
+  p_opt_net,
+  filename = "figures/fig_network_optimal.png"
+)
+```
+
+### Evolved network
+
+```{r}
+p_evo_net =
+ggraph(
+  networks[["evolved"]][[7]], 
+  x = xn, y = yn
+) +
+  geom_edge_fan(
+    edge_width = 0.2,
+    edge_colour = "grey",
+    aes(
+      edge_alpha = weight
+    ),
+    show.legend = FALSE
+  )+
+  geom_node_point(
+    aes(
+      fill = cent_degree / 200,
+      size = assoc
+    ),
+    shape = 21
+  )+
+  scale_fill_scico(
+    palette = "hawaii",
+    direction = -1,
+    limits = c(0, 0.5),
+    labels = scales::percent,
+    breaks = c(0, 0.25, 0.5),
+    name = "Degree"
+  )+
+  scale_edge_alpha(
+    range = c(0.3, 1)
+  )+
+  coord_fixed(
+    xlim = c(0, 30),
+    ylim = c(0, 30)
+  )+
+  ggraph::theme_graph(
+    background = "white"
+  )+
+  theme(
+    legend.position = "top",
+    legend.key.height = unit(2, "mm"),
+    legend.title = element_text(vjust = 1)
+  )+
+  guides(
+    size = "none"
+  )
+
+ggsave(
+  p_evo_net,
+  filename = "figures/fig_network_evolved.png"
+)
+```
+
+```{r}
+# wrap figures
+p_nets = wrap_plots(
+  p_ran_net, p_opt_net, p_evo_net,
+  nrow = 1,
+  guides = "collect"
+) &
+  theme(
+    legend.position = "top"
+  )
+
+ggsave(
+  p_nets, filename = "figures/fig_networks.png",
+  height = 5, width = 15
+)
+```
