@@ -50,7 +50,7 @@ data_random <- lapply(seq(20), function(x) {
     popsize = 200,
     genmax = 1,
     dispersal = 10,
-    range_perception = 0.5,
+    range_perception = 1.0,
     mProb = 0.01,
     mSize = 0.01,
     nThreads = 1
@@ -110,7 +110,7 @@ data_random <- lapply(seq(20), function(x) {
     popsize = 200,
     genmax = 1,
     dispersal = 10,
-    range_perception = 0.5,
+    range_perception = 1.0,
     mProb = 0.01,
     mSize = 0.01,
     nThreads = 1
@@ -172,7 +172,7 @@ data_optimal <- lapply(seq(20), function(x) {
     popsize = 200,
     genmax = 1,
     dispersal = 10,
-    range_perception = 0.5,
+    range_perception = 1.0,
     mProb = 0.01,
     mSize = 0.01,
     nThreads = 1
@@ -232,7 +232,7 @@ data_optimal <- lapply(seq(20), function(x) {
     popsize = 200,
     genmax = 1,
     dispersal = 10,
-    range_perception = 0.5,
+    range_perception = 1.0,
     mProb = 0.01,
     mSize = 0.01,
     nThreads = 1
@@ -316,7 +316,7 @@ data_evolved_intake = Map(
 )
 
 data_evolved_intake = rbindlist(data_evolved_intake)
-data_evolved_intake = get_social_strategy(data_evolved_intake)
+data_evolved_intake = ecoevomove2::get_social_strategy(data_evolved_intake)
 
 # add details
 data_evolved_intake[, landscape := "patchy"]
@@ -377,7 +377,7 @@ data_evolved_intake = Map(
 )
 
 data_evolved_intake = rbindlist(data_evolved_intake)
-data_evolved_intake = get_social_strategy(data_evolved_intake)
+data_evolved_intake = ecoevomove2::get_social_strategy(data_evolved_intake)
 
 # add details
 data_evolved_intake[, landscape := "homog"]
@@ -440,7 +440,7 @@ data_evolved_intake = Map(
 )
 
 data_evolved_intake = rbindlist(data_evolved_intake)
-data_evolved_intake = get_social_strategy(data_evolved_intake)
+data_evolved_intake = ecoevomove2::get_social_strategy(data_evolved_intake)
 
 # add details
 data_evolved_intake[, landscape := "patchy"]
@@ -502,7 +502,7 @@ data_evolved_intake = Map(
 )
 
 data_evolved_intake = rbindlist(data_evolved_intake)
-data_evolved_intake = get_social_strategy(data_evolved_intake)
+data_evolved_intake = ecoevomove2::get_social_strategy(data_evolved_intake)
 
 # add details
 data_evolved_intake[, landscape := "homog"]
