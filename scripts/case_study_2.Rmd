@@ -87,7 +87,7 @@ fwrite(
 Networks from random walk on patchy landscape.
 
 ```{r}
-networks_random = lapply(data_random, make_network, weight_threshold = 3)
+networks_random = lapply(data_random, ecoevomove2::make_network, weight_threshold = 3)
 
 # save networks
 saveRDS(networks_random, file = "inst/data/networks_random_patchy.Rds")
@@ -147,7 +147,7 @@ fwrite(
 Networks from random walk on homogeneous landscape.
 
 ```{r}
-networks_random = lapply(data_random, make_network, weight_threshold = 3)
+networks_random = lapply(data_random, ecoevomove2::make_network, weight_threshold = 3)
 
 # save networks
 saveRDS(networks_random, file = "inst/data/networks_random_homog.Rds")
@@ -209,7 +209,7 @@ fwrite(
 Networks from optimal movement strategies on patchy landscapes.
 
 ```{r}
-networks_optimal = lapply(data_optimal, make_network, weight_threshold = 3)
+networks_optimal = lapply(data_optimal, ecoevomove2::make_network, weight_threshold = 3)
 
 # save networks
 saveRDS(networks_optimal, file = "inst/data/networks_optimal_patchy.Rds")
@@ -269,7 +269,7 @@ fwrite(
 Networks from optimal movement strategies on homogeneous landscapes.
 
 ```{r}
-networks_optimal = lapply(data_optimal, make_network, weight_threshold = 3)
+networks_optimal = lapply(data_optimal, ecoevomove2::make_network, weight_threshold = 3)
 
 # save networks
 saveRDS(networks_optimal, file = "inst/data/networks_optimal_homog.Rds")
@@ -332,7 +332,7 @@ fwrite(
 Networks from evolved movement strategies on patchy landscapes.
 
 ```{r}
-networks_evolved = lapply(data_evolved, make_network, weight_threshold = 3)
+networks_evolved = lapply(data_evolved, ecoevomove2::make_network, weight_threshold = 3)
 
 # save networks
 saveRDS(networks_evolved, file = "inst/data/networks_evolved_patchy.Rds")
@@ -393,7 +393,7 @@ fwrite(
 Networks from evolved movement strategies on homog landscapes.
 
 ```{r}
-networks_evolved = lapply(data_evolved, make_network, weight_threshold = 3)
+networks_evolved = lapply(data_evolved, ecoevomove2::make_network, weight_threshold = 3)
 
 # save networks
 saveRDS(networks_evolved, file = "inst/data/networks_evolved_homog.Rds")
