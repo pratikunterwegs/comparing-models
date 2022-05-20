@@ -1,0 +1,77 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# Ecological outcomes
+
+```{r}
+library(data.table)
+
+# for plotting
+library(ggplot2)
+library(scico)
+library(patchwork)
+```
+
+Load trait data.
+
+```{r}
+# list files
+trait_data = list.files(
+  "inst/data/", pattern = "trait", full.names = TRUE
+)
+
+# read files
+trait_data = lapply(trait_data, fread)
+
+# get similar columns and add social strategy
+trait_data = lapply(trait_data, function(df) {
+  
+  # assign social strategy and dispersal
+  if(!"social_strat" %in% colnames(df)) {
+    df[, social_strat := "none"]
+  }
+  if(!"dispersal" %in% colnames(df)) {
+    df[, dispersal := "local"]
+  }
+  
+  df[, c("intake", "energy", "assoc", "moved", "replicate",
+         "social_strat", "landscape", "type", "dispersal")]
+})
+
+# get as bound df
+trait_data = rbindlist(trait_data)
+```
+
+## Examine mean intake
+
+```{r}
+ggplot(trait_data)+
+  geom_boxplot(
+    aes(
+      type, intake
+    )
+  )+
+  facet_grid(
+    cols = vars(landscape)
+  )
+```
+
+## Examine distance moved and associations
+
+```{r}
+ggplot(trait_data)+
+  geom_point(
+    aes(
+      moved, assoc,
+      col = social_strat
+    )
+  )+
+  scale_y_sqrt()+
+  facet_grid(
+    rows = vars(type),
+    cols = vars(landscape)
+  )
+```
+
