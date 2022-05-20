@@ -88,3 +88,30 @@ plot_network = function(g, colour_by) {
     )+
     ggplot2::theme_test()
 }
+
+#' Handle SIR data from network models.
+#'
+#' @param data A list of SIR model replicates, output of the \code{igraph::sir}
+#' function.
+#' @param digits Pass digits to round function.
+#'
+#' @return A data.table of SIR data.
+#' @export
+handle_sir_data = function(data, digits = 1) {
+  d = lapply(data, data.table::as.data.table)
+  d = Map(d, seq(length(d)), f = function(data, repl) {
+    data$repl = repl
+    data
+  })
+  d = data.table::rbindlist(d)
+  d = data.table::melt(
+    d,
+    id.vars = c("times", "repl"),
+    value.name = "agents",
+    variable.name = "class"
+  )
+  d[, time := round(times, digits)]
+  
+  # summarise over time bins
+  d = d[, list(mean = mean(agents)), by = c("time", "class", "repl")]
+}
