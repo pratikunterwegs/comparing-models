@@ -512,7 +512,7 @@ data_evolved_intake[, dispersal := "global"]
 # save trait data
 fwrite(
     data_evolved_intake,
-    file = "inst/data/data_traits_evolved_patchy_global.csv"
+    file = "inst/data/data_traits_evolved_homog_global.csv"
 )
 ```
 
