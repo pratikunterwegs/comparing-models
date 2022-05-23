@@ -19,7 +19,9 @@ get_test_landscape <- function(nItems, landsize, nClusters, clusterSpread, regen
 #' arguments to the corresponding R function.
 #'
 #' @param scenario The scenario: 0 for random movement, 1 for optimal movement,
-#' 2 for evolved mechanistic movement.
+#' 2 for evolved mechanistic movement with preferences for food items and
+#' individuals, and 3 for evolved mechanistic movement with preferences for
+#' food items, and for individuals differentiated by their handling status.
 #' @param popsize The population size.
 #' @param nItems How many food items on the landscape.
 #' @param landsize The size of the landscape as a numeric (double).
