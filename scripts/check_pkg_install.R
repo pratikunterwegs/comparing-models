@@ -8,7 +8,7 @@ devtools::document()
 library(ggplot2)
 
 # test case 0
-a <- linkmoveecoevo::model_case_2(
+a <- ecoevomove2::model_case_2(
   scenario = 0,
   landsize = 60,
   nItems = 1800,
@@ -26,8 +26,27 @@ a <- linkmoveecoevo::model_case_2(
   nThreads = 1
 )
 
+# test case 3
+a <- ecoevomove2::model_case_2(
+  scenario = 3,
+  landsize = 60,
+  nItems = 1800,
+  clusterSpread = 1.0,
+  nClusters = 100,
+  regen_time = 100,
+  tmax = 20,
+  handling_time = 5,
+  popsize = 500,
+  genmax = 20,
+  dispersal = 10,
+  range_perception = 1.0,
+  mProb = 0.01,
+  mSize = 0.01,
+  nThreads = 2
+)
+
 # test case 2
-a <- linkmoveecoevo::model_case_2(
+a <- ecoevomove2::model_case_2(
   scenario = 2,
   landsize = 60,
   nItems = 1800,
@@ -37,7 +56,7 @@ a <- linkmoveecoevo::model_case_2(
   tmax = 20,
   handling_time = 5,
   popsize = 500,
-  genmax = 100,
+  genmax = 20,
   dispersal = 10,
   range_perception = 1.0,
   mProb = 0.01,
@@ -46,7 +65,7 @@ a <- linkmoveecoevo::model_case_2(
 )
 
 # test case 1
-a <- linkmoveecoevo::model_case_2(
+a <- ecoevomove2::model_case_2(
   scenario = 1,
   landsize = 60,
   nItems = 1800,
