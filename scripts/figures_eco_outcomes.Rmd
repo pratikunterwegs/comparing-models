@@ -34,7 +34,7 @@ trait_data = lapply(trait_data, function(df) {
     df[, social_strat := "none"]
   }
   if(!"dispersal" %in% colnames(df)) {
-    df[, dispersal := fifelse(type == "evolved", "local", "global")]
+    df[, dispersal := fifelse(type %in% c("evolved", "unevolved"), "local", "global")]
   }
   
   df[, c("intake", "energy", "assoc", "moved", "replicate",
@@ -46,7 +46,7 @@ trait_data = rbindlist(trait_data)
 
 # set levels
 trait_data[, type := factor(
-  type, levels = c("random", "optimal", "evolved")
+  type, levels = c("random", "optimal", "unevolved", "evolved")
 )]
 ```
 
@@ -62,8 +62,8 @@ p_intake =
       type, intake,
       fill = type
     ),
+    notch = TRUE,
     width = 0.3,
-    size = 1,
     col = "grey30",
     show.legend = T
   )+
@@ -73,9 +73,11 @@ p_intake =
     lty = 2
   )+
   scale_x_discrete(
-    labels = c(
-      "Random", "Optimal", "Evolved"
-    )
+    # labels = c(
+    #   "Random", "Optimal", "" "Evolved"
+    # )
+    labels = NULL,
+    name = "Movement implementation"
   )+
   scale_fill_scico_d(
     palette = "hawaii",
@@ -83,11 +85,73 @@ p_intake =
     labels = c(
       "Random\nwalk",
       "Optimal\nmovement",
-      "Evolved\nhabitat selection"
+      "Habitat selection\n(no evolution)",
+      "Habitat selection\n(evolved strategies)"
     )
   )+
   theme_classic()+
   theme(legend.position = "top")+
+  guides(
+    fill = guide_legend(
+      nrow = 2
+    )
+  )+
+  labs(
+    x = NULL,
+    y = "Per-capita intake"
+  )
+```
+
+## Intake and distance
+
+```{r}
+summary_intake_move = trait_data[landscape == "patchy" & 
+  dispersal == "global"][, unlist(
+    lapply(.SD, function(x) {
+      list(mean = mean(x), sd = sd(x))
+    }
+    ), recursive = FALSE
+  ), by = c("type"), .SDcols = c("intake", "moved")]
+
+ggplot(trait_data[landscape == "patchy" & dispersal == "global"])+
+  geom_jitter(
+    aes(
+      moved, intake,
+      col = type
+    ),
+    shape = 1,
+    alpha = 0.2,
+    size = 0.2
+  )
+  geom_hline(
+    yintercept = 40,
+    col = "indianred",
+    lty = 2
+  )+
+  scale_x_discrete(
+    # labels = c(
+    #   "Random", "Optimal", "" "Evolved"
+    # )
+    labels = NULL,
+    name = "Movement implementation"
+  )+
+  scale_fill_scico_d(
+    palette = "hawaii",
+    name = NULL,
+    labels = c(
+      "Random\nwalk",
+      "Optimal\nmovement",
+      "Habitat selection\n(no evolution)",
+      "Habitat selection\n(evolved strategies)"
+    )
+  )+
+  theme_classic()+
+  theme(legend.position = "top")+
+  guides(
+    fill = guide_legend(
+      nrow = 2
+    )
+  )+
   labs(
     x = NULL,
     y = "Per-capita intake"
@@ -105,7 +169,7 @@ p_move =
       fill = type
     ),
     width = 0.3,
-    size = 1,
+    notch = TRUE,
     col = "grey30",
     outlier.size = 0.2,
     show.legend = TRUE
@@ -116,9 +180,11 @@ p_move =
     lty = 2
   )+
   scale_x_discrete(
-    labels = c(
-      "Random", "Optimal", "Evolved"
-    )
+    # labels = c(
+    #   "Random", "Optimal", "" "Evolved"
+    # )
+    labels = NULL,
+    name = "Movement implementation"
   )+
   scale_fill_scico_d(
     palette = "hawaii",
@@ -126,12 +192,18 @@ p_move =
     labels = c(
       "Random\nwalk",
       "Optimal\nmovement",
-      "Evolved\nhabitat selection"
+      "Habitat selection\n(no evolution)",
+      "Habitat selection\n(evolved strategies)"
     )
   )+
   theme_classic()+
   theme(
     legend.position = "top"
+  )+
+  guides(
+    fill = guide_legend(
+      nrow = 2
+    )
   )+
   labs(
     x = NULL,
@@ -150,18 +222,17 @@ p_assoc =
       fill = type
     ),
     width = 0.3,
-    size = 1,
+    notch = TRUE,
     col = "grey30",
     outlier.size = 0.2,
     show.legend = TRUE
   )+
   scale_x_discrete(
-    labels = c(
-      "Random", "Optimal", "Evolved"
-    )
-  )+
-  scale_y_log10(
-    labels = scales::comma
+    # labels = c(
+    #   "Random", "Optimal", "" "Evolved"
+    # )
+    labels = NULL,
+    name = "Movement implementation"
   )+
   scale_fill_scico_d(
     palette = "hawaii",
@@ -169,14 +240,26 @@ p_assoc =
     labels = c(
       "Random\nwalk",
       "Optimal\nmovement",
-      "Evolved\nhabitat selection"
+      "Habitat selection\n(no evolution)",
+      "Habitat selection\n(evolved strategies)"
     )
+  )+
+  scale_y_log10(
+    labels = scales::comma
+  )+
+  coord_cartesian(
+    ylim = c(100, NA)
   )+
   theme_classic()+
   theme(
     legend.position = "top",
     axis.text.y = element_text(
       angle = 90, hjust = 0.5
+    )
+  )+
+  guides(
+    fill = guide_legend(
+      nrow = 2
     )
   )+
   labs(
@@ -195,12 +278,18 @@ p_eco =
 ) &
   theme(
     legend.position = "top"
+  ) &
+  guides(
+    fill = guide_legend(
+      nrow = 1
+    )
   )
 
 # write plots to file
 ggsave(
   p_eco,
-  filename = "figures/fig_eco_outcomes.png"
+  filename = "figures/fig_eco_outcomes.png",
+  height = 4, width = 7
 )
 ```
 
@@ -216,50 +305,55 @@ data_sir = fread("inst/data/data_sir_thr_12.csv")
 data_sir = data_sir[landscape == "patchy" & dispersal == "global"]
 
 # set factor levels
-data_sir[, type := factor(type, 
-                              levels = c("random", "optimal", "evolved"))]
+data_sir[, type := factor(
+  type, 
+  levels = c("random", "optimal", "unevolved", "evolved")
+)]
 ```
 
 ```{r}
-p_sir = ggplot(data_sir[time < 5 & class == "NI"])+
+p_sir = 
+ggplot(data_sir[time < 5 & class == "NI"])+
+stat_summary(
+    aes(
+      time, mean / 400,
+      group = type
+    ),
+    geom = "line",
+    col = "grey30"
+  )+
   stat_summary(
     aes(
       time, mean / 400,
-      col = type
+      fill = type
     ),
-    size = 1,
-    geom = "line"
+    shape = 21
   )+
-  # stat_summary(
-  #   aes(
-  #     time, mean / 400,
-  #     col = type,
-  #     shape = type
-  #   )
-  # )+
+  
   scale_y_continuous(
     labels = scales::percent_format()
   )+
-  scale_shape_manual(
-    values = c(
-      "evolved" = 0,
-      "optimal" = 1,
-      "random" = 2
-    ),
-    name = NULL,
-    labels = c(
-      "Random\nwalk",
-      "Optimal\nmovement",
-      "Evolved\nhabitat selection"
-    )
-  )+
-  scale_colour_scico_d(
+  # scale_shape_manual(
+  #   values = c(
+  #     "evolved" = 0,
+  #     "optimal" = 1,
+  #     "random" = 2
+  #   ),
+  #   name = NULL,
+  #   labels = c(
+  #     "Random\nwalk",
+  #     "Optimal\nmovement",
+  #     "Evolved\nhabitat selection"
+  #   )
+  # )+
+  scale_fill_scico_d(
     palette = "hawaii",
     name = NULL,
     labels = c(
       "Random\nwalk",
       "Optimal\nmovement",
-      "Evolved\nhabitat selection"
+      "Habitat selection\n(no evolution)",
+      "Habitat selection\n(evolved strategies)"
     )
   )+
   theme_classic()+
@@ -275,7 +369,8 @@ p_sir = ggplot(data_sir[time < 5 & class == "NI"])+
   )
 
 ggsave(
-  p_sir, filename = "figures/fig_sir.png"
+  p_sir, filename = "figures/fig_sir.png",
+  height = 4, width = 5
 )
 ```
 
@@ -294,7 +389,7 @@ network_files = network_files[grep("patchy", network_files)][-1]
 
 # read networks
 networks = lapply(network_files, readRDS)
-names(networks) = c("evolved", "optimal", "random")
+names(networks) = c("evolved", "optimal", "random", "unevolved")
 ```
 
 ```{r}
@@ -340,8 +435,8 @@ ggraph(
     shape = 21
   )+
   scale_fill_scico(
-    palette = "hawaii",
-    direction = -1,
+    palette = "lajolla",
+    direction = 1,
     limits = c(0, 0.5),
     labels = scales::percent,
     breaks = c(0, 0.25, 0.5),
@@ -396,8 +491,8 @@ ggraph(
     shape = 21
   )+
   scale_fill_scico(
-    palette = "hawaii",
-    direction = -1,
+    palette = "lajolla",
+    direction = 1,
     limits = c(0, 0.5),
     labels = scales::percent,
     breaks = c(0, 0.25, 0.5),
@@ -452,8 +547,8 @@ ggraph(
     shape = 21
   )+
   scale_fill_scico(
-    palette = "hawaii",
-    direction = -1,
+    palette = "lajolla",
+    direction = 1,
     limits = c(0, 0.5),
     labels = scales::percent,
     breaks = c(0, 0.25, 0.5),
@@ -485,10 +580,60 @@ ggsave(
 ```
 
 ```{r}
+p_unevo_net =
+ggraph(
+  networks[["unevolved"]][[7]], 
+  x = xn, y = yn
+) +
+  geom_edge_fan(
+    edge_width = 0.2,
+    edge_colour = "grey",
+    aes(
+      edge_alpha = weight
+    ),
+    show.legend = FALSE
+  )+
+  geom_node_point(
+    aes(
+      fill = cent_degree / 200,
+      size = assoc
+    ),
+    shape = 21
+  )+
+  scale_fill_scico(
+    palette = "lajolla",
+    direction = 1,
+    limits = c(0, 0.5),
+    labels = scales::percent,
+    breaks = c(0, 0.25, 0.5),
+    name = "Degree"
+  )+
+  scale_edge_alpha(
+    range = c(0.3, 1)
+  )+
+  coord_fixed(
+    xlim = c(0, 30),
+    ylim = c(0, 30)
+  )+
+  ggraph::theme_graph(
+    background = "white"
+  )+
+  theme(
+    legend.position = "top",
+    legend.key.height = unit(2, "mm"),
+    legend.title = element_text(vjust = 1)
+  )+
+  guides(
+    size = "none"
+  )
+
+```
+
+```{r}
 # wrap figures
 p_nets = wrap_plots(
-  p_ran_net, p_opt_net, p_evo_net,
-  nrow = 1,
+  p_ran_net, p_opt_net, p_unevo_net, p_evo_net,
+  nrow = 2,
   guides = "collect"
 ) &
   theme(
@@ -497,6 +642,6 @@ p_nets = wrap_plots(
 
 ggsave(
   p_nets, filename = "figures/fig_networks.png",
-  height = 5, width = 15
+  height = 10, width = 10
 )
 ```
