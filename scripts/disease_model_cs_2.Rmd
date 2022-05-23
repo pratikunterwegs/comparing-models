@@ -45,10 +45,10 @@ data_sir_models = Map(
   f = function(file) {
     
     # detect sim type and landscape type
-    type = stringr::str_extract(file, "(unevolved)|(evolved)|(optimal)|(random)")
+    type = stringr::str_extract(file, "(unevolved)|(evolved)|(optimal)|(random)|(2pref)|(pref2_unevolved)")
     landscape = stringr::str_extract(file, "(patchy)|(homog)")
     dispersal = fifelse(stringr::str_detect(file, "global"), "global", "local")
-    dispersal = fifelse(type %in% c("evolved", "unevolved"), dispersal, "global")
+    dispersal = fifelse(type %in% c("evolved", "unevolved", "2pref", "pref2_unevolved"), dispersal, "global")
     
     # load networks
     data_nt = readRDS(file)
