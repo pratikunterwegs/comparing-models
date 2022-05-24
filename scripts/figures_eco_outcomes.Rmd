@@ -10,9 +10,12 @@ library(data.table)
 
 # for plotting
 library(ggplot2)
-library(scico)
+library(colorspace)
 library(patchwork)
 library(ggraph)
+
+library(magick)
+library(tidygraph)
 ```
 
 Load trait data.
@@ -53,9 +56,12 @@ trait_data[, type := factor(
 )]
 
 # subset data
-trait_data = trait_data[landscape == "patchy" &
+trait_data = trait_data[
+  # landscape == "patchy" &
                           dispersal == "global" &
-                          type %in% c("random", "optimal", "2pref", "evolved")]
+                          type %in% c("random", "optimal",
+                                      "pref2_unevolved", "2pref",
+                                      "unevolved", "evolved")]
 ```
 
 ```{r}
@@ -72,11 +78,24 @@ scale_prefs = function(df) {
 ## Evolved traits
 
 ```{r}
-strategies = trait_data[type %in% c("2pref", "unevolved", "evolved")]
-strategies[type == "2pref", sN := 0]
+strategies = trait_data[type %in% c("pref2_unevolved", "2pref", "unevolved", "evolved")]
+strategies[type %in% c("2pref", "pref2_unevolved"), sN := 0]
 
 scale_prefs(strategies)
 ```
+
+```{r}
+ggplot(
+  strategies
+)+
+  geom_point(
+    aes(
+      sN, intake
+    )
+  )+
+  facet_grid(landscape~type)
+```
+
 
 ## Intake
 
@@ -85,37 +104,37 @@ Prepare plot for intake or harvesting.
 ```{r}
 p_intake =
   ggplot(trait_data)+
-  geom_boxplot(
+  stat_boxplot(
     aes(
       type, intake,
       fill = type
     ),
-    width = 0.3,
     notch = TRUE,
     col = "grey30",
     outlier.size = 0.2,
     show.legend = TRUE
   )+
-  geom_hline(
-    yintercept = 40,
-    col = "indianred",
-    lty = 2
-  )+
   scale_x_discrete(
     labels = NULL,
-    name = "Movement implementation"
+    name = NULL
   )+
-  scale_fill_scico_d(
-    palette = "batlow",
+  scale_fill_discrete_sequential(
+    palette = "Hawaii",
     labels = c(
-      "Random\nwalk", "Optimal\nmovement", 
+      "Random\nwalk", "Optimal\nmovement",
+      "Mechanistic\n2 cues\nG = 1",
       "Mechanistic\n2 cues\nG = 100",
+      "Mechanistic\n3 cues\nG = 1",
       "Mechanistic\n3 cues\nG = 100"
     ),
     name = NULL
   )+
-  theme_test()+
-  theme(legend.position = "top")+
+  theme_test(
+    base_size = 10
+  )+
+  coord_cartesian(
+    ylim = c(0, 50)
+  )+
   guides(
     fill = guide_legend(
       nrow = 2
@@ -137,33 +156,28 @@ p_move =
       type, moved,
       fill = type
     ),
-    width = 0.3,
     notch = TRUE,
     col = "grey30",
     outlier.size = 0.2,
     show.legend = TRUE
   )+
-  geom_hline(
-    yintercept = 200,
-    col = "indianred",
-    lty = 2
-  )+
   scale_x_discrete(
     labels = NULL,
-    name = "Movement implementation"
+    name = NULL
   )+
-  scale_fill_scico_d(
-    palette = "batlow",
+  scale_fill_discrete_sequential(
+    palette = "Hawaii",
     labels = c(
-      "Random\nwalk", "Optimal\nmovement", 
+      "Random\nwalk", "Optimal\nmovement",
+      "Mechanistic\n2 cues\nG = 1",
       "Mechanistic\n2 cues\nG = 100",
+      "Mechanistic\n3 cues\nG = 1",
       "Mechanistic\n3 cues\nG = 100"
     ),
     name = NULL
   )+
-  theme_test()+
-  theme(
-    legend.position = "top"
+  theme_test(
+    base_size = 10
   )+
   guides(
     fill = guide_legend(
@@ -186,7 +200,6 @@ p_assoc =
       type, assoc,
       fill = type
     ),
-    width = 0.3,
     notch = TRUE,
     col = "grey30",
     outlier.size = 0.2,
@@ -194,29 +207,30 @@ p_assoc =
   )+
   scale_x_discrete(
     labels = NULL,
-    name = "Movement implementation"
+    name = NULL
   )+
-  scale_fill_scico_d(
-    palette = "batlow",
+  scale_fill_discrete_sequential(
+    palette = "Hawaii",
     labels = c(
-      "Random\nwalk", "Optimal\nmovement", 
+      "Random\nwalk", "Optimal\nmovement",
+      "Mechanistic\n2 cues\nG = 1",
       "Mechanistic\n2 cues\nG = 100",
+      "Mechanistic\n3 cues\nG = 1",
       "Mechanistic\n3 cues\nG = 100"
     ),
     name = NULL
   )+
   scale_y_log10(
-    labels = scales::comma
+    labels = scales::trans_format(
+      "log10", 
+      scales::math_format(10^.x)
+    )
   )+
   coord_cartesian(
     ylim = c(100, NA)
   )+
-  theme_test()+
-  theme(
-    legend.position = "top",
-    axis.text.y = element_text(
-      angle = 90, hjust = 0.5
-    )
+  theme_test(
+    base_size = 10
   )+
   guides(
     fill = guide_legend(
@@ -229,6 +243,37 @@ p_assoc =
   )
 ```
 
+Make figure 2.
+
+```{r}
+fig_cs_2_1 = wrap_plots(
+  p_intake, p_move, p_assoc,
+  nrow = 1,
+  guides = "collect"
+) &
+  plot_annotation(
+    tag_levels = "A"
+  )&
+  theme(
+    legend.position = "bottom",
+    legend.key.width = unit(2, "mm"),
+    plot.tag = element_text(
+      size = 8, face = "bold"
+    )
+  )&
+  guides(
+    fill = guide_legend(
+      nrow = 1
+    )
+  )
+
+ggsave(
+  fig_cs_2_1,
+  filename = "figures/fig_cs_2_1.png",
+  width = 137, height = 60, units = "mm"
+)
+```
+
 ## Disease spread
 
 Load SIR model data.
@@ -238,85 +283,96 @@ data_sir = fread("inst/data/data_sir_thr_12.csv")
 
 # examine only patchy landscapes with global dispersal
 data_sir = data_sir[landscape == "patchy" &
-                          dispersal == "global" &
-                          type %in% c("random", "optimal", "2pref", "evolved")]
+                          dispersal == "global"]
 
 # set factor levels
 data_sir[, type := factor(
   type, 
-  levels = c("random", "optimal", "2pref", "evolved")
+  levels = c("random", "optimal", "pref2_unevolved", 
+             "2pref", "unevolved", "evolved")
+)]
+
+# split by broad type
+data_sir[, type2 := fcase(
+  type %in% c("2pref", "pref2_unevolved"), "pref_2",
+  type %in% c("evolved", "unevolved"), "pref_3",
+  type %in% c("random", "optimal"), "nonmech"
 )]
 ```
 
 ```{r}
 p_sir =
 ggplot(data_sir[time < 5 & class == "NI"])+
-stat_summary(
-    aes(
-      time, mean / 400,
-      group = type,
-      col = type
-    ),
-    geom = "line"
-  )+
+  stat_summary(
+      aes(
+        time, mean / 400,
+        group = type,
+        col = type
+      ),
+      geom = "line"
+    )+
   stat_summary(
     aes(
       time, mean / 400,
-      col = type,
-      shape = type
-    )
+      col = type
+    ),
+    size = 0.3
   )+
   scale_y_continuous(
-    labels = scales::percent_format()
+    labels = scales::percent_format(),
+    breaks = c(0, 0.2, 0.4)
   )+
-  scale_shape_manual(
-    values = c(
-      "evolved" = 16,
-      "2pref" = 17,
-      "optimal" = 15,
-      "random" = 18
-    ),
-    name = NULL,
+  scale_colour_discrete_sequential(
+    palette = "Hawaii",
     labels = c(
-      "Random\nwalk", "Optimal\nmovement", 
+      "Random\nwalk", "Optimal\nmovement",
+      "Mechanistic\n2 cues\nG = 1",
       "Mechanistic\n2 cues\nG = 100",
+      "Mechanistic\n3 cues\nG = 1",
       "Mechanistic\n3 cues\nG = 100"
+    ),
+    name = NULL
+  )+
+  facet_wrap(
+    facets = vars(type2),
+    nrow = 1,
+    labeller = labeller(
+      type2 = c(
+        "nonmech" = "Random & optimal",
+        "pref_2" = "Mechanistic, 2 cues",
+        "pref_3" = "Mechanistic, 3 cues"
+      )
     )
   )+
-  scale_fill_scico_d(
-    palette = "batlow",
-    labels = c(
-      "Random\nwalk", "Optimal\nmovement", 
-      "Mechanistic\n2 cues\nG = 100",
-      "Mechanistic\n3 cues\nG = 100"
-    ),
-    name = NULL
+  theme_test(
+    base_size = 10
   )+
-  scale_colour_scico_d(
-    palette = "batlow",
-    labels = c(
-      "Random\nwalk", "Optimal\nmovement", 
-      "Mechanistic\n2 cues\nG = 100",
-      "Mechanistic\n3 cues\nG = 100"
-    ),
-    name = NULL
-  )+
-  theme_test()+
   theme(
     legend.position = "top",
     axis.text.y = element_text(
       angle = 90, hjust = 0.5
-    )
+    ),
+    strip.background = element_blank(),
+    strip.text = element_text(
+      face = "italic"
+    ),
+    legend.key.width = unit(2, "mm")
   )+
   guides(
     colour = guide_legend(
-      nrow = 2
+      nrow = 1
     )
   )+
   labs(
     x = "SIR model time",
     y = "Individuals infected"
   )
+
+ggsave(
+  p_sir,
+  filename = "figures/fig_cs_2_2.png",
+  width = 137, height = 60, units = "mm"
+)
 ```
 
 ## Networks
@@ -330,13 +386,25 @@ network_files = list.files(
 )
 
 # subset for patchy landscapes with global dispersal
-network_files = network_files[grep("patchy", network_files)]#[-1]
+network_files = network_files[grep("patchy", network_files)][-2]
 network_files = network_files[c(1, 3, 4, 6)]
 
 # read networks
 networks = lapply(network_files, readRDS)
-names(networks) = c("2pref", "evolved", "optimal", "random")
+names(networks) = c("2pref", "evolved", "optimal", 
+                    "2pref_unevolved", "random", "unevolved")
 ```
+
+```{r}
+modularity = lapply(networks, function(le) {
+  lapply(le, function(g) {
+    g %>% mutate(
+      group = group_edge_betweenness()
+    )
+  })
+})
+```
+
 
 ```{r}
 threshold = 12
@@ -357,232 +425,91 @@ networks = lapply(networks, function(le) {
 })
 ```
 
-### Random walk network
+Plot networks.
 
 ```{r}
-p_ran_net =
-ggraph(
-  networks[["random"]][[7]], 
-  x = xn, y = yn
-) +
-  geom_edge_fan(
-    edge_width = 0.2,
-    edge_colour = "grey",
-    aes(
-      edge_alpha = weight
-    ),
-    show.legend = FALSE
-  )+
-  geom_node_point(
-    aes(
-      fill = cent_degree / 200,
-      size = assoc
-    ),
-    shape = 21
-  )+
-  scale_fill_scico(
-    limits = c(0, 0.5),
-    labels = scales::percent,
-    breaks = c(0, 0.25, 0.5),
-    name = "Degree"
-  )+
-  scale_edge_alpha(
-    range = c(0.3, 1)
-  )+
-  ggraph::theme_graph(
-    background = "white"
-  )+
-  theme(
-    legend.position = "top",
-    legend.key.height = unit(2, "mm"),
-    legend.title = element_text(vjust = 1)
-  )+
-  guides(
-    size = "none"
-  )
-
-ggsave(
-  p_ran_net,
-  filename = "figures/fig_network_random.png"
-)
-```
-
-### Optimal movement network
-
-```{r}
-p_opt_net =
-ggraph(
-  networks[["optimal"]][[7]], 
-  x = xn, y = yn
-) +
-  geom_edge_fan(
-    edge_width = 0.2,
-    edge_colour = "grey",
-    aes(
-      edge_alpha = weight
-    ),
-    show.legend = FALSE
-  )+
-  geom_node_point(
-    aes(
-      fill = cent_degree / 200,
-      size = assoc
-    ),
-    shape = 21
-  )+
-  scale_fill_scico(
-    limits = c(0, 0.5),
-    labels = scales::percent,
-    breaks = c(0, 0.25, 0.5),
-    name = "Degree"
-  )+
-  scale_edge_alpha(
-    range = c(0.3, 1)
-  )+
-  ggraph::theme_graph(
-    background = "white"
-  )+
-  theme(
-    legend.position = "top",
-    legend.key.height = unit(2, "mm"),
-    legend.title = element_text(vjust = 1)
-  )+
-  guides(
-    size = "none"
-  )
-
-ggsave(
-  p_opt_net,
-  filename = "figures/fig_network_optimal.png"
-)
-```
-
-### Evolved network, 2 cues
-
-```{r}
-p_2pref =
-ggraph(
-  networks[["2pref"]][[7]], 
-  x = xn, y = yn
-) +
-  # geom_edge_fan(
-  #   edge_width = 0.2,
-  #   edge_colour = "grey",
-  #   aes(
-  #     edge_alpha = weight
-  #   ),
-  #   show.legend = FALSE
-  # )+
-  geom_node_point(
-    aes(
-      fill = cent_degree / 200,
-      size = assoc
-    ),
-    shape = 21
-  )+
-  scale_fill_scico(
-    limits = c(0, 0.5),
-    labels = scales::percent,
-    breaks = c(0, 0.25, 0.5),
-    name = "Degree"
-  )+
-  scale_edge_alpha(
-    range = c(0.3, 1)
-  )+
-  ggraph::theme_graph(
-    background = "white"
-  )+
-  theme(
-    legend.position = "top",
-    legend.key.height = unit(2, "mm"),
-    legend.title = element_text(vjust = 1)
-  )+
-  guides(
-    size = "none"
-  )
-
-ggsave(
-  p_evo_net,
-  filename = "figures/fig_network_evolved.png"
-)
+nt_for_plot = lapply(networks, `[[`, 7)[
+  c("random", "optimal", "2pref_unevolved",
+                "2pref", "unevolved", "evolved")]
 ```
 
 
-### Evolved network
-
 ```{r}
-p_evo_net =
-ggraph(
-  networks[["evolved"]][[7]], 
-  x = xn, y = yn
-) +
-  # geom_edge_fan(
-  #   edge_width = 0.2,
-  #   edge_colour = "grey",
-  #   aes(
-  #     edge_alpha = weight
-  #   ),
-  #   show.legend = FALSE
-  # )+
-  geom_node_point(
-    aes(
-      fill = cent_degree / 200,
-      size = assoc
-    ),
-    shape = 21
-  )+
-  scale_fill_scico(
-    limits = c(0, 0.5),
-    labels = scales::percent,
-    breaks = c(0, 0.25, 0.5),
-    name = "Degree"
-  )+
-  scale_edge_alpha(
-    range = c(0.3, 1)
-  )+
-  ggraph::theme_graph(
-    background = "white"
-  )+
-  theme(
-    legend.position = "top",
-    legend.key.height = unit(2, "mm"),
-    legend.title = element_text(vjust = 1)
-  )+
-  guides(
-    size = "none"
-  )
-
-ggsave(
-  p_evo_net,
-  filename = "figures/fig_network_evolved.png"
+plots_nt = Map(
+  nt_for_plot,
+  f = function(g) {
+    
+    g = mutate(g, assoc = ifelse(assoc > 2000, 2000, assoc))
+    
+    ggraph(
+      g, 
+      x = xn, y = yn
+    ) +
+      geom_edge_fan(
+        edge_width = 0.2,
+        edge_colour = "grey",
+        aes(
+          edge_alpha = weight
+        ),
+        show.legend = FALSE
+      )+
+      geom_node_point(
+        aes(
+          fill = cent_degree / 200,
+          size = assoc
+        ),
+        shape = 21
+      )+
+      scale_fill_continuous_sequential(
+        palette = "Plasma",
+        limits = c(0, 0.5),
+        labels = scales::percent,
+        breaks = c(0, 0.25, 0.5),
+        name = "Degree"
+      )+
+      scale_edge_alpha(
+        range = c(0.3, 1)
+      )+
+      scale_size(
+        range = c(0.1, 3),
+        limits = c(1, 2e3)
+      )+
+      ggraph::theme_graph(
+        background = "white",
+        plot_margin = margin(rep(0, 4))
+      )+
+      theme(
+        legend.position = "top",
+        legend.key.height = unit(2, "mm"),
+        legend.title = element_text(vjust = 1)
+      )+
+      guides(
+        size = "none"
+      )
+  }
 )
-```
 
-```{r}
-# wrap figures
-p_nets = wrap_plots(
-  p_ran_net, p_opt_net, p_2pref, p_evo_net,
-  nrow = 2,
+plot_networks = wrap_plots(
+  plots_nt,
+  nrow = 3,
   guides = "collect"
 ) &
   theme(
-    legend.position = "top"
+    legend.position = "bottom"
+  ) &
+  plot_annotation(
+    tag_levels = "A"
+  ) &
+  theme(
+    plot.tag = element_text(
+      size = 8,
+      face = "bold"
+    )
   )
 
 ggsave(
-  p_nets, filename = "figures/fig_networks.png",
-  height = 10, width = 10
+  plot_networks,
+  filename = "figures/fig_cs_2_networks.png",
+  width = 110, height = 190, units = "mm"
 )
-```
-
-## Make figure cs 2
-
-```{r}
-wrap_plots(
-    p_intake, p_move, p_assoc, 
-    nrow = 2, 
-    guides = "collect"
-  ) & theme(
-    legend.position = "top"
-  )
 ```
