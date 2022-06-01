@@ -1,0 +1,132 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# Scenario 2: Optimal movement
+
+```{r}
+# load packages
+library(data.table)
+library(ggplot2)
+```
+
+## Optimal movement, patchy resource landscapes
+
+```{r}
+# run scenarios
+data_optimal <- lapply(seq(20), function(x) {
+  ecoevomove2::model_case_2(
+    scenario = 1,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 30,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 200,
+    genmax = 1,
+    dispersal = 10,
+    range_perception = 1.0,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 1
+  )
+})
+```
+
+```{r}
+# examine intake in optimal movement
+data_optimal_intake = lapply(data_optimal, slot, "trait_data")
+
+# assign replicate
+data_optimal_intake = Map(
+    data_optimal_intake, seq(length(data_optimal_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
+data_optimal_intake = rbindlist(data_optimal_intake)
+
+# add details
+data_optimal_intake[, landscape := "patchy"]
+data_optimal_intake[, type := "optimal"]
+
+# save trait data
+fwrite(
+    data_optimal_intake,
+    file = "inst/data/data_traits_optimal_patchy.csv"
+)
+```
+
+Networks from optimal movement strategies on patchy landscapes.
+
+```{r}
+networks_optimal = lapply(data_optimal, ecoevomove2::make_network, weight_threshold = 3)
+
+# save networks
+saveRDS(networks_optimal, file = "inst/data/networks_optimal_patchy.Rds")
+```
+
+## Optimal movement, homogeneous resource landscapes
+
+```{r}
+# run scenarios
+data_optimal <- lapply(seq(20), function(x) {
+  ecoevomove2::model_case_2(
+    scenario = 1,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 90,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 200,
+    genmax = 1,
+    dispersal = 10,
+    range_perception = 1.0,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 1
+  )
+})
+```
+
+```{r}
+# examine intake in optimal movement
+data_optimal_intake = lapply(data_optimal, slot, "trait_data")
+
+# assign replicate
+data_optimal_intake = Map(
+    data_optimal_intake, seq(length(data_optimal_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
+data_optimal_intake = rbindlist(data_optimal_intake)
+
+# add details
+data_optimal_intake[, landscape := "homog"]
+data_optimal_intake[, type := "optimal"]
+
+# save trait data
+fwrite(
+    data_optimal_intake,
+    file = "inst/data/data_traits_optimal_homog.csv"
+)
+```
+
+Networks from optimal movement strategies on homogeneous landscapes.
+
+```{r}
+networks_optimal = lapply(data_optimal, ecoevomove2::make_network, weight_threshold = 3)
+
+# save networks
+saveRDS(networks_optimal, file = "inst/data/networks_optimal_homog.Rds")
+```

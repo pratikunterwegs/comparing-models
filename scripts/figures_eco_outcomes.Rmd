@@ -1,0 +1,515 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# Ecological outcomes
+
+```{r}
+library(data.table)
+
+# for plotting
+library(ggplot2)
+library(colorspace)
+library(patchwork)
+library(ggraph)
+
+library(magick)
+library(tidygraph)
+```
+
+Load trait data.
+
+```{r}
+# list files
+trait_data = list.files(
+  "inst/data/", pattern = "trait", full.names = TRUE
+)
+
+# read files
+trait_data = lapply(trait_data, fread)
+
+# get similar columns and add social strategy
+trait_data = lapply(trait_data, function(df) {
+  
+  # assign social strategy and dispersal
+  if(!"social_strat" %in% colnames(df)) {
+    df[, social_strat := "none"]
+  }
+  if(!"dispersal" %in% colnames(df)) {
+    df[, dispersal := fifelse(type %in% c("evolved", "unevolved"), "local", "global")]
+  }
+  
+  df[, c("intake", "energy", "assoc", "moved", "replicate",
+         "social_strat", "landscape", "type", "dispersal",
+         "sF", "sH", "sN")]
+})
+
+# get as bound df
+trait_data = rbindlist(trait_data)
+
+# set levels
+trait_data[, type := factor(
+  type, levels = c("random", "optimal", "pref2_unevolved",
+                   "2pref", "unevolved", "evolved"
+  )
+)]
+
+# subset data
+trait_data = trait_data[
+  # landscape == "patchy" &
+                          dispersal == "global" &
+                          type %in% c("random", "optimal",
+                                      "pref2_unevolved", "2pref",
+                                      "unevolved", "evolved")]
+```
+
+```{r}
+scale_prefs = function(df) {
+  # get movement strategy
+  df[, c("sF", "sH", "sN") := lapply(
+    .SD, function(tr_) {
+      tr_ / (abs(sF) + abs(sH) + abs(sN))
+    }
+  ), .SDcols = c("sF", "sH", "sN")][]
+}
+```
+
+## Evolved traits
+
+```{r}
+strategies = trait_data[type %in% c("pref2_unevolved", "2pref", "unevolved", "evolved")]
+strategies[type %in% c("2pref", "pref2_unevolved"), sN := 0]
+
+scale_prefs(strategies)
+```
+
+```{r}
+ggplot(
+  strategies
+)+
+  geom_point(
+    aes(
+      sN, intake
+    )
+  )+
+  facet_grid(landscape~type)
+```
+
+
+## Intake
+
+Prepare plot for intake or harvesting.
+
+```{r}
+p_intake =
+  ggplot(trait_data)+
+  stat_boxplot(
+    aes(
+      type, intake,
+      fill = type
+    ),
+    notch = TRUE,
+    col = "grey30",
+    outlier.size = 0.2,
+    show.legend = TRUE
+  )+
+  scale_x_discrete(
+    labels = NULL,
+    name = NULL
+  )+
+  scale_fill_discrete_sequential(
+    palette = "Hawaii",
+    labels = c(
+      "Random\nwalk", "Optimal\nmovement",
+      "Mechanistic\n2 cues\nG = 1",
+      "Mechanistic\n2 cues\nG = 100",
+      "Mechanistic\n3 cues\nG = 1",
+      "Mechanistic\n3 cues\nG = 100"
+    ),
+    name = NULL
+  )+
+  theme_test(
+    base_size = 10
+  )+
+  coord_cartesian(
+    ylim = c(0, 50)
+  )+
+  guides(
+    fill = guide_legend(
+      nrow = 2
+    )
+  )+
+  labs(
+    x = NULL,
+    y = "Per-capita intake"
+  )
+```
+
+## Distance moved
+
+```{r}
+p_move =
+  ggplot(trait_data)+
+  geom_boxplot(
+    aes(
+      type, moved,
+      fill = type
+    ),
+    notch = TRUE,
+    col = "grey30",
+    outlier.size = 0.2,
+    show.legend = TRUE
+  )+
+  scale_x_discrete(
+    labels = NULL,
+    name = NULL
+  )+
+  scale_fill_discrete_sequential(
+    palette = "Hawaii",
+    labels = c(
+      "Random\nwalk", "Optimal\nmovement",
+      "Mechanistic\n2 cues\nG = 1",
+      "Mechanistic\n2 cues\nG = 100",
+      "Mechanistic\n3 cues\nG = 1",
+      "Mechanistic\n3 cues\nG = 100"
+    ),
+    name = NULL
+  )+
+  theme_test(
+    base_size = 10
+  )+
+  guides(
+    fill = guide_legend(
+      nrow = 2
+    )
+  )+
+  labs(
+    x = NULL,
+    y = "Distance moved"
+  )
+```
+
+## Associations
+
+```{r}
+p_assoc =
+  ggplot(trait_data)+
+  geom_boxplot(
+    aes(
+      type, assoc,
+      fill = type
+    ),
+    notch = TRUE,
+    col = "grey30",
+    outlier.size = 0.2,
+    show.legend = TRUE
+  )+
+  scale_x_discrete(
+    labels = NULL,
+    name = NULL
+  )+
+  scale_fill_discrete_sequential(
+    palette = "Hawaii",
+    labels = c(
+      "Random\nwalk", "Optimal\nmovement",
+      "Mechanistic\n2 cues\nG = 1",
+      "Mechanistic\n2 cues\nG = 100",
+      "Mechanistic\n3 cues\nG = 1",
+      "Mechanistic\n3 cues\nG = 100"
+    ),
+    name = NULL
+  )+
+  scale_y_log10(
+    labels = scales::trans_format(
+      "log10", 
+      scales::math_format(10^.x)
+    )
+  )+
+  coord_cartesian(
+    ylim = c(100, NA)
+  )+
+  theme_test(
+    base_size = 10
+  )+
+  guides(
+    fill = guide_legend(
+      nrow = 2
+    )
+  )+
+  labs(
+    x = NULL,
+    y = "Associations"
+  )
+```
+
+Make figure 2.
+
+```{r}
+fig_cs_2_1 = wrap_plots(
+  p_intake, p_move, p_assoc,
+  nrow = 1,
+  guides = "collect"
+) &
+  plot_annotation(
+    tag_levels = "A"
+  )&
+  theme(
+    legend.position = "bottom",
+    legend.key.width = unit(2, "mm"),
+    plot.tag = element_text(
+      size = 8, face = "bold"
+    )
+  )&
+  guides(
+    fill = guide_legend(
+      nrow = 1
+    )
+  )
+
+ggsave(
+  fig_cs_2_1,
+  filename = "figures/fig_cs_2_1.png",
+  width = 137, height = 60, units = "mm"
+)
+```
+
+## Disease spread
+
+Load SIR model data.
+
+```{r}
+data_sir = fread("inst/data/data_sir_thr_12.csv")
+
+# examine only patchy landscapes with global dispersal
+data_sir = data_sir[landscape == "patchy" &
+                          dispersal == "global"]
+
+# set factor levels
+data_sir[, type := factor(
+  type, 
+  levels = c("random", "optimal", "pref2_unevolved", 
+             "2pref", "unevolved", "evolved")
+)]
+
+# split by broad type
+data_sir[, type2 := fcase(
+  type %in% c("2pref", "pref2_unevolved"), "pref_2",
+  type %in% c("evolved", "unevolved"), "pref_3",
+  type %in% c("random", "optimal"), "nonmech"
+)]
+```
+
+```{r}
+p_sir =
+ggplot(data_sir[time < 5 & class == "NI"])+
+  stat_summary(
+      aes(
+        time, mean / 400,
+        group = type,
+        col = type
+      ),
+      geom = "line"
+    )+
+  stat_summary(
+    aes(
+      time, mean / 400,
+      col = type
+    ),
+    size = 0.3
+  )+
+  scale_y_continuous(
+    labels = scales::percent_format(),
+    breaks = c(0, 0.2, 0.4)
+  )+
+  scale_colour_discrete_sequential(
+    palette = "Hawaii",
+    labels = c(
+      "Random\nwalk", "Optimal\nmovement",
+      "Mechanistic\n2 cues\nG = 1",
+      "Mechanistic\n2 cues\nG = 100",
+      "Mechanistic\n3 cues\nG = 1",
+      "Mechanistic\n3 cues\nG = 100"
+    ),
+    name = NULL
+  )+
+  facet_wrap(
+    facets = vars(type2),
+    nrow = 1,
+    labeller = labeller(
+      type2 = c(
+        "nonmech" = "Random & optimal",
+        "pref_2" = "Mechanistic, 2 cues",
+        "pref_3" = "Mechanistic, 3 cues"
+      )
+    )
+  )+
+  theme_test(
+    base_size = 10
+  )+
+  theme(
+    legend.position = "top",
+    axis.text.y = element_text(
+      angle = 90, hjust = 0.5
+    ),
+    strip.background = element_blank(),
+    strip.text = element_text(
+      face = "italic"
+    ),
+    legend.key.width = unit(2, "mm")
+  )+
+  guides(
+    colour = guide_legend(
+      nrow = 1
+    )
+  )+
+  labs(
+    x = "SIR model time",
+    y = "Individuals infected"
+  )
+
+ggsave(
+  p_sir,
+  filename = "figures/fig_cs_2_2.png",
+  width = 137, height = 60, units = "mm"
+)
+```
+
+## Networks
+
+```{r}
+# read networks
+network_files = list.files(
+  path = "inst/data/",
+  pattern = "networks",
+  full.names = TRUE
+)
+
+# subset for patchy landscapes with global dispersal
+network_files = network_files[grep("patchy", network_files)][-2]
+network_files = network_files[c(1, 3, 4, 6)]
+
+# read networks
+networks = lapply(network_files, readRDS)
+names(networks) = c("2pref", "evolved", "optimal", 
+                    "2pref_unevolved", "random", "unevolved")
+```
+
+```{r}
+modularity = lapply(networks, function(le) {
+  lapply(le, function(g) {
+    g %>% mutate(
+      group = group_edge_betweenness()
+    )
+  })
+})
+```
+
+
+```{r}
+threshold = 12
+
+# process networks
+networks = lapply(networks, function(le) {
+  lapply(le, function(g) {
+    g = g %>% 
+      activate(edges) %>% 
+      filter(weight > threshold) %>% 
+      activate(nodes)
+    
+    g = g %>% 
+      mutate(
+        cent_degree = tidygraph::centrality_degree()
+      )
+  })
+})
+```
+
+Plot networks.
+
+```{r}
+nt_for_plot = lapply(networks, `[[`, 7)[
+  c("random", "optimal", "2pref_unevolved",
+                "2pref", "unevolved", "evolved")]
+```
+
+
+```{r}
+plots_nt = Map(
+  nt_for_plot,
+  f = function(g) {
+    
+    g = mutate(g, assoc = ifelse(assoc > 2000, 2000, assoc))
+    
+    ggraph(
+      g, 
+      x = xn, y = yn
+    ) +
+      geom_edge_fan(
+        edge_width = 0.2,
+        edge_colour = "grey",
+        aes(
+          edge_alpha = weight
+        ),
+        show.legend = FALSE
+      )+
+      geom_node_point(
+        aes(
+          fill = cent_degree / 200,
+          size = assoc
+        ),
+        shape = 21
+      )+
+      scale_fill_continuous_sequential(
+        palette = "Plasma",
+        limits = c(0, 0.5),
+        labels = scales::percent,
+        breaks = c(0, 0.25, 0.5),
+        name = "Degree"
+      )+
+      scale_edge_alpha(
+        range = c(0.3, 1)
+      )+
+      scale_size(
+        range = c(0.1, 3),
+        limits = c(1, 2e3)
+      )+
+      ggraph::theme_graph(
+        background = "white",
+        plot_margin = margin(rep(0, 4))
+      )+
+      theme(
+        legend.position = "top",
+        legend.key.height = unit(2, "mm"),
+        legend.title = element_text(vjust = 1)
+      )+
+      guides(
+        size = "none"
+      )
+  }
+)
+
+plot_networks = wrap_plots(
+  plots_nt,
+  nrow = 3,
+  guides = "collect"
+) &
+  theme(
+    legend.position = "bottom"
+  ) &
+  plot_annotation(
+    tag_levels = "A"
+  ) &
+  theme(
+    plot.tag = element_text(
+      size = 8,
+      face = "bold"
+    )
+  )
+
+ggsave(
+  plot_networks,
+  filename = "figures/fig_cs_2_networks.png",
+  width = 110, height = 190, units = "mm"
+)
+```

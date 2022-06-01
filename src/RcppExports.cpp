@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // get_test_landscape
 Rcpp::DataFrame get_test_landscape(const int nItems, const float landsize, const int nClusters, const float clusterSpread, const int regen_time);
-RcppExport SEXP _linkmoveecoevo_get_test_landscape(SEXP nItemsSEXP, SEXP landsizeSEXP, SEXP nClustersSEXP, SEXP clusterSpreadSEXP, SEXP regen_timeSEXP) {
+RcppExport SEXP _ecoevomove2_get_test_landscape(SEXP nItemsSEXP, SEXP landsizeSEXP, SEXP nClustersSEXP, SEXP clusterSpreadSEXP, SEXP regen_timeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -27,7 +27,7 @@ END_RCPP
 }
 // model_case_2
 S4 model_case_2(const int scenario, const int popsize, const int nItems, const float landsize, const int nClusters, const float clusterSpread, const int tmax, const int genmax, const float range_perception, const int handling_time, const int regen_time, const int nThreads, const float dispersal, const float mProb, const float mSize);
-RcppExport SEXP _linkmoveecoevo_model_case_2(SEXP scenarioSEXP, SEXP popsizeSEXP, SEXP nItemsSEXP, SEXP landsizeSEXP, SEXP nClustersSEXP, SEXP clusterSpreadSEXP, SEXP tmaxSEXP, SEXP genmaxSEXP, SEXP range_perceptionSEXP, SEXP handling_timeSEXP, SEXP regen_timeSEXP, SEXP nThreadsSEXP, SEXP dispersalSEXP, SEXP mProbSEXP, SEXP mSizeSEXP) {
+RcppExport SEXP _ecoevomove2_model_case_2(SEXP scenarioSEXP, SEXP popsizeSEXP, SEXP nItemsSEXP, SEXP landsizeSEXP, SEXP nClustersSEXP, SEXP clusterSpreadSEXP, SEXP tmaxSEXP, SEXP genmaxSEXP, SEXP range_perceptionSEXP, SEXP handling_timeSEXP, SEXP regen_timeSEXP, SEXP nThreadsSEXP, SEXP dispersalSEXP, SEXP mProbSEXP, SEXP mSizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -52,12 +52,12 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_linkmoveecoevo_get_test_landscape", (DL_FUNC) &_linkmoveecoevo_get_test_landscape, 5},
-    {"_linkmoveecoevo_model_case_2", (DL_FUNC) &_linkmoveecoevo_model_case_2, 15},
+    {"_ecoevomove2_get_test_landscape", (DL_FUNC) &_ecoevomove2_get_test_landscape, 5},
+    {"_ecoevomove2_model_case_2", (DL_FUNC) &_ecoevomove2_model_case_2, 15},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_linkmoveecoevo(DllInfo *dll) {
+RcppExport void R_init_ecoevomove2(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

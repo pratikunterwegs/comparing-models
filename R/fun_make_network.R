@@ -6,65 +6,68 @@
 #'
 #' @return A `tidygraph` objects.
 #' @export
-make_network = function(object, weight_threshold) {
-    assertthat::assert_that(
-        class(object) == "simulation_output",
-        msg = "pmv get traits: object is not simulation output"
-    )
+make_network <- function(object, weight_threshold) {
+  assertthat::assert_that(
+    class(object) == "simulation_output",
+    msg = "pmv get traits: object is not simulation output"
+  )
 
-    # handle edges
-    edgelist = object@edge_list
-    colnames(edgelist) = c("from", "to", "weight")
-    edgelist = data.table::as.data.table(edgelist)
-    
-    edgelist = edgelist[edgelist$from != edgelist$to, ]
+  # handle edges
+  edgelist <- object@edge_list
+  colnames(edgelist) <- c("from", "to", "weight")
+  edgelist <- data.table::as.data.table(edgelist)
 
-    edgelist = edgelist[edgelist$weight >= weight_threshold, ]
+  edgelist <- edgelist[edgelist$from != edgelist$to, ]
 
-    edgelist$to = edgelist$to + 1
-    edgelist$from = edgelist$from + 1
+  edgelist <- edgelist[edgelist$weight >= weight_threshold, ]
 
-    # handle nodes
-    nodes = object@trait_data
-    data.table::setDT(nodes)
-    nodes$id = seq(nrow(nodes))
+  edgelist$to <- edgelist$to + 1
+  edgelist$from <- edgelist$from + 1
 
-    # get movement strategy
-    nodes[, c("sF", "sH", "sN") := lapply(
-      .SD, function(tr_) {
-        tr_ / (abs(sF) + abs(sH) + abs(sN))
-      }
-    ), .SDcols = c("sF", "sH", "sN")][]
-    nodes[, social_strat := data.table::fcase(
-        (sH > 0 & sN > 0), "agent tracking",
-        (sH > 0 & sN < 0), "handler tracking",
-        (sH < 0 & sN > 0), "non-handler tracking",
-        (sH < 0 & sN < 0), "agent avoiding"
+  # handle nodes
+  nodes <- object@trait_data
+  data.table::setDT(nodes)
+  nodes$id <- seq(nrow(nodes))
+
+  # get movement strategy
+  nodes[, c("sF", "sH", "sN") := lapply(
+    .SD, function(tr_) {
+      tr_ / (abs(sF) + abs(sH) + abs(sN))
+    }
+  ), .SDcols = c("sF", "sH", "sN")][]
+  nodes[, social_strat := data.table::fcase(
+    (sH > 0 & sN > 0), "agent tracking",
+    (sH > 0 & sN < 0), "handler tracking",
+    (sH < 0 & sN > 0), "non-handler tracking",
+    (sH < 0 & sN < 0), "agent avoiding"
   )][]
 
-    # make tidygraph objects
-    g = tidygraph::tbl_graph(
-        nodes = nodes,
-        edges = edgelist,
-        directed = FALSE
-    )
+  # make tidygraph objects
+  g <- tidygraph::tbl_graph(
+    nodes = nodes,
+    edges = edgelist,
+    directed = FALSE
+  )
 
-    g
+  g
 }
 
 #' Plot networks from data from `simulation_output` objects.
 #'
 #' @param g A `tidygraph` object.
-#' 
+#' @param colour_by A variable name, _not_ as a string.
 #' @return A `ggplot` object.
 #' @export
-plot_network = function(g) {
+plot_network = function(g, colour_by) {
+
+    colour_by = rlang::enquo(colour_by)
+
     ggraph::ggraph(
         g, x = xn, y = yn
     ) +
     ggraph::geom_edge_fan(
         edge_width = 0.5,
-        edge_colour = "grey40",
+        edge_colour = "grey70",
         ggplot2::aes(
             edge_alpha = weight
         ),
@@ -72,19 +75,43 @@ plot_network = function(g) {
     )+
     ggraph::geom_node_point(
         ggplot2::aes(
-          fill = assoc,
+          fill = !!colour_by,
           size = assoc
         ),
-        shape = 21,
-        show.legend = F
-    )+
-    ggplot2::scale_colour_distiller(
-        palette = "Greys"
+        shape = 21
     )+
     ggplot2::scale_size_continuous(
         range = c(0.5, 5)
     )+
     ggraph::scale_edge_alpha(
         range = c(0.3, 1)
-    )
+    )+
+    ggplot2::theme_test()
+}
+
+#' Handle SIR data from network models.
+#'
+#' @param data A list of SIR model replicates, output of the \code{igraph::sir}
+#' function.
+#' @param digits Pass digits to round function.
+#'
+#' @return A data.table of SIR data.
+#' @export
+handle_sir_data = function(data, digits = 1) {
+  d = lapply(data, data.table::as.data.table)
+  d = Map(d, seq(length(d)), f = function(data, repl) {
+    data$repl = repl
+    data
+  })
+  d = data.table::rbindlist(d)
+  d = data.table::melt(
+    d,
+    id.vars = c("times", "repl"),
+    value.name = "agents",
+    variable.name = "class"
+  )
+  d[, time := round(times, digits)]
+  
+  # summarise over time bins
+  d = d[, list(mean = mean(agents)), by = c("time", "class", "repl")]
 }

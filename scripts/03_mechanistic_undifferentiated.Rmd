@@ -1,0 +1,260 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# Scenario 3: Mechanistic, undifferentiated competitor preferences
+
+```{r}
+# load packages
+library(data.table)
+library(ggplot2)
+```
+
+## Evolved, mechanistic movement with undifferentiated agent preferences on patchy resource landscapes
+
+```{r}
+# run scenarios
+data_2pref <- lapply(seq(20), function(x) {
+  ecoevomove2::model_case_2(
+    scenario = 2,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 30,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 200,
+    genmax = 100,
+    dispersal = 10,
+    range_perception = 1,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 2
+  )
+})
+```
+
+```{r}
+# examine intake in evolved movement
+data_2pref_intake = lapply(data_2pref, slot, "trait_data")
+
+# assign replicate
+data_2pref_intake = Map(
+    data_2pref_intake, seq(length(data_2pref_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
+data_2pref_intake = rbindlist(data_2pref_intake)
+data_2pref_intake = ecoevomove2::get_social_strategy(data_2pref_intake)
+
+# add details
+data_2pref_intake[, landscape := "patchy"]
+data_2pref_intake[, type := "2pref"]
+data_2pref_intake[, dispersal := "global"]
+
+# save trait data
+fwrite(
+    data_2pref_intake,
+    file = "inst/data/data_traits_2pref_patchy_global.csv"
+)
+```
+
+Networks from evolved movement strategies on patchy landscapes.
+
+```{r}
+networks_2pref = lapply(data_2pref, ecoevomove2::make_network, weight_threshold = 3)
+
+# save networks
+saveRDS(networks_2pref, file = "inst/data/networks_2pref_patchy_global.Rds")
+```
+
+## Evolved, mechanistic movement with undifferentiated agent preferences on homogeneous resource landscapes
+
+```{r}
+# run scenarios
+data_2pref <- lapply(seq(20), function(x) {
+  ecoevomove2::model_case_2(
+    scenario = 2,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 90,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 200,
+    genmax = 100,
+    dispersal = 10,
+    range_perception = 1,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 2
+  )
+})
+```
+
+```{r}
+# examine intake in evolved movement
+data_2pref_intake = lapply(data_2pref, slot, "trait_data")
+
+# assign replicate
+data_2pref_intake = Map(
+    data_2pref_intake, seq(length(data_2pref_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
+data_2pref_intake = rbindlist(data_2pref_intake)
+data_2pref_intake = ecoevomove2::get_social_strategy(data_2pref_intake)
+
+# add details
+data_2pref_intake[, landscape := "homog"]
+data_2pref_intake[, type := "2pref"]
+data_2pref_intake[, dispersal := "global"]
+
+# save trait data
+fwrite(
+    data_2pref_intake,
+    file = "inst/data/data_traits_2pref_homog_global.csv"
+)
+```
+
+Networks from evolved movement strategies on homog landscapes.
+
+```{r}
+networks_2pref = lapply(data_2pref, ecoevomove2::make_network, weight_threshold = 3)
+
+# save networks
+saveRDS(networks_2pref, file = "inst/data/networks_2pref_homog_global.Rds")
+```
+
+## Unevolved, mechanistic movement with undifferentiated agent preferences on patchy resource landscapes
+
+```{r}
+# run scenarios
+data_unevolved <- lapply(seq(20), function(x) {
+  ecoevomove2::model_case_2(
+    scenario = 2,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 30,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 200,
+    genmax = 1,
+    dispersal = 10,
+    range_perception = 1,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 2
+  )
+})
+```
+
+```{r}
+# examine intake in unevolved movement
+data_unevolved_intake = lapply(data_unevolved, slot, "trait_data")
+
+# assign replicate
+data_unevolved_intake = Map(
+    data_unevolved_intake, seq(length(data_unevolved_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
+data_unevolved_intake = rbindlist(data_unevolved_intake)
+data_unevolved_intake = ecoevomove2::get_social_strategy(data_unevolved_intake)
+
+# add details
+data_unevolved_intake[, landscape := "patchy"]
+data_unevolved_intake[, type := "pref2_unevolved"]
+data_unevolved_intake[, dispersal := "global"]
+
+# save trait data
+fwrite(
+    data_unevolved_intake,
+    file = "inst/data/data_traits_pref2_unevolved_patchy_global.csv"
+)
+```
+
+Networks from unevolved movement strategies on patchy landscapes.
+
+```{r}
+networks_unevolved = lapply(data_unevolved, ecoevomove2::make_network, weight_threshold = 3)
+
+# save networks
+saveRDS(networks_unevolved, file = "inst/data/networks_pref2_unevolved_patchy_global.Rds")
+```
+
+## Unevolved, mechanistic movement with undifferentiated agent preferences on homogeneous resource landscapes
+
+```{r}
+# run scenarios
+data_unevolved <- lapply(seq(20), function(x) {
+  ecoevomove2::model_case_2(
+    scenario = 2,
+    landsize = 30,
+    nItems = 450,
+    clusterSpread = 0.5,
+    nClusters = 90,
+    regen_time = 100,
+    tmax = 400,
+    handling_time = 5,
+    popsize = 200,
+    genmax = 1,
+    dispersal = 10,
+    range_perception = 1,
+    mProb = 0.01,
+    mSize = 0.01,
+    nThreads = 2
+  )
+})
+```
+
+```{r}
+# examine intake in unevolved movement
+data_unevolved_intake = lapply(data_unevolved, slot, "trait_data")
+
+# assign replicate
+data_unevolved_intake = Map(
+    data_unevolved_intake, seq(length(data_unevolved_intake)),
+    f = function(df, n) {
+        setDT(df)
+        df[, replicate := as.factor(n)][]
+    }
+)
+
+data_unevolved_intake = rbindlist(data_unevolved_intake)
+data_unevolved_intake = ecoevomove2::get_social_strategy(data_unevolved_intake)
+
+# add details
+data_unevolved_intake[, landscape := "homog"]
+data_unevolved_intake[, type := "pref2_unevolved"]
+data_unevolved_intake[, dispersal := "global"]
+
+# save trait data
+fwrite(
+    data_unevolved_intake,
+    file = "inst/data/data_traits_pref2_unevolved_homog_global.csv"
+)
+```
+
+Networks from unevolved movement strategies on homog landscapes.
+
+```{r}
+networks_unevolved = lapply(data_unevolved, ecoevomove2::make_network, weight_threshold = 3)
+
+# save networks
+saveRDS(networks_unevolved, file = "inst/data/networks_pref2_unevolved_homog_global.Rds")
+```
