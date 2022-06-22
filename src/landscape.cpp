@@ -79,6 +79,17 @@ void Resources::regenerate() {
     countAvailable();
 }
 
+/// function to return a landscape object as an Rcpp dataframe
+Rcpp::DataFrame Resources::record_landscape() {
+    return (
+        Rcpp::DataFrame::create(
+            Named("x") = coordX,
+            Named("y") = coordY,
+            Nmaed("t_avail") = counter
+        )
+    )
+}
+
 /// function to export landscape as matrix
 //' Returns a test landscape.
 //'
