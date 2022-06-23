@@ -435,7 +435,7 @@ S4 model_case_2(const int scenario,
     x.slot("parameters") = Rcpp::wrap(param_list);
     x.slot("trait_data") = Rcpp::wrap(simOutput["gen_data"]);
     x.slot("edge_list") = Rcpp::wrap(simOutput["edge_list"]);
-    x.slot("landscape") = Rcpp::wrap(simOutput["landscape"])
+    x.slot("landscape") = Rcpp::wrap(simOutput["landscape"]);
 
     return(x);
 }
