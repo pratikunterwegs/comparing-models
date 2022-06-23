@@ -103,7 +103,7 @@ Prepare plot for intake or harvesting.
 
 ```{r}
 p_intake =
-  ggplot(trait_data)+
+  ggplot(trait_data[type %in% c("2pref", "evolved", "optimal", "random")])+
   stat_boxplot(
     aes(
       type, intake,
@@ -122,10 +122,10 @@ p_intake =
     palette = "Hawaii",
     labels = c(
       "Random\nwalk", "Optimal\nmovement",
-      "Mechanistic\n2 cues\nG = 1",
-      "Mechanistic\n2 cues\nG = 100",
-      "Mechanistic\n3 cues\nG = 1",
-      "Mechanistic\n3 cues\nG = 100"
+      # "Mechanistic\n2 cues\nG = 1",
+      "Mechanistic\n2 cues",
+      # "Mechanistic\n3 cues\nG = 1",
+      "Mechanistic\n3 cues"
     ),
     name = NULL
   )+
@@ -150,7 +150,7 @@ p_intake =
 
 ```{r}
 p_move =
-  ggplot(trait_data)+
+  ggplot(trait_data[type %in% c("2pref", "evolved", "optimal", "random")])+
   geom_boxplot(
     aes(
       type, moved,
@@ -169,10 +169,10 @@ p_move =
     palette = "Hawaii",
     labels = c(
       "Random\nwalk", "Optimal\nmovement",
-      "Mechanistic\n2 cues\nG = 1",
-      "Mechanistic\n2 cues\nG = 100",
-      "Mechanistic\n3 cues\nG = 1",
-      "Mechanistic\n3 cues\nG = 100"
+      # "Mechanistic\n2 cues\nG = 1",
+      "Mechanistic\n2 cues",
+      # "Mechanistic\n3 cues\nG = 1",
+      "Mechanistic\n3 cues"
     ),
     name = NULL
   )+
@@ -247,7 +247,8 @@ Make figure 2.
 
 ```{r}
 fig_cs_2_1 = wrap_plots(
-  p_intake, p_move, p_assoc,
+  p_intake, p_move, 
+  # p_assoc,
   nrow = 1,
   guides = "collect"
 ) &
@@ -269,8 +270,8 @@ fig_cs_2_1 = wrap_plots(
 
 ggsave(
   fig_cs_2_1,
-  filename = "figures/fig_cs_2_1.png",
-  width = 137, height = 60, units = "mm"
+  filename = "figures/fig_case_study_ecological_outcomes.png",
+  width = 100, height = 80, units = "mm"
 )
 ```
 
@@ -386,13 +387,13 @@ network_files = list.files(
 )
 
 # subset for patchy landscapes with global dispersal
-network_files = network_files[grep("patchy", network_files)][-2]
+network_files = network_files[grep("patchy", network_files)]
 network_files = network_files[c(1, 3, 4, 6)]
 
 # read networks
 networks = lapply(network_files, readRDS)
 names(networks) = c("2pref", "evolved", "optimal", 
-                    "2pref_unevolved", "random", "unevolved")
+                    "random")
 ```
 
 ```{r}
@@ -429,8 +430,7 @@ Plot networks.
 
 ```{r}
 nt_for_plot = lapply(networks, `[[`, 7)[
-  c("random", "optimal", "2pref_unevolved",
-                "2pref", "unevolved", "evolved")]
+  c("random", "optimal", "2pref", "evolved")]
 ```
 
 
@@ -491,7 +491,7 @@ plots_nt = Map(
 
 plot_networks = wrap_plots(
   plots_nt,
-  nrow = 3,
+  nrow = 2,
   guides = "collect"
 ) &
   theme(
