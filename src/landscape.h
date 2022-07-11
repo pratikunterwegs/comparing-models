@@ -58,6 +58,7 @@ public:
     void initResources();
     void countAvailable();
     void regenerate();
+    Rcpp::DataFrame record_landscape();
 };
 
 #endif // LANDSCAPE_H

@@ -92,7 +92,8 @@ Rcpp::List simulation::do_simulation_mechanistic() {
 
     return Rcpp::List::create(
         Named("gen_data") = pop_trait_data,
-        Named("edge_list") = edgeList
+        Named("edge_list") = edgeList,
+        Named("landscape") = food.record_landscape()
         // Named("move_post") = mdPost.getMoveData()
     );
 }
@@ -180,7 +181,8 @@ Rcpp::List simulation::do_simulation_2pref() {
 
     return Rcpp::List::create(
         Named("gen_data") = pop_trait_data,
-        Named("edge_list") = edgeList
+        Named("edge_list") = edgeList,
+        Named("landscape") = food.record_landscape()
         // Named("move_post") = mdPost.getMoveData()
     );
 }
@@ -270,7 +272,8 @@ Rcpp::List simulation::do_simulation_optimal() {
 
     return Rcpp::List::create(
         Named("gen_data") = pop_trait_data,
-        Named("edge_list") = edgeList
+        Named("edge_list") = edgeList,
+        Named("landscape") = food.record_landscape()
         // Named("move_post") = mdPost.getMoveData()
     );
 }
@@ -334,7 +337,8 @@ Rcpp::List simulation::do_simulation_random() {
 
     return Rcpp::List::create(
         Named("gen_data") = pop.returnPopData(),
-        Named("edge_list") = edgeList
+        Named("edge_list") = edgeList,
+        Named("landscape") = food.record_landscape()
         // Named("move_data") = mdPre.getMoveData()
     );
 }
@@ -423,8 +427,6 @@ S4 model_case_2(const int scenario,
             Named("generations") = genmax,
             Named("timesteps") = tmax,
             Named("pop_size") = popsize,
-            Named("pop_density") = static_cast<float>(popsize) / landsize,
-            Named("item_density") = static_cast<float>(nItems) / landsize,
             Named("dispersal") = dispersal
         );
 
@@ -433,6 +435,7 @@ S4 model_case_2(const int scenario,
     x.slot("parameters") = Rcpp::wrap(param_list);
     x.slot("trait_data") = Rcpp::wrap(simOutput["gen_data"]);
     x.slot("edge_list") = Rcpp::wrap(simOutput["edge_list"]);
+    x.slot("landscape") = Rcpp::wrap(simOutput["landscape"]);
 
     return(x);
 }
