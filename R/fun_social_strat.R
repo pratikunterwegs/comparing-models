@@ -19,3 +19,20 @@ get_social_strategy = function(df) {
     (sH < 0 & sN < 0), "agent avoiding"
   )][]
 }
+
+scale_prefs = function(df) {
+  # make data.table
+  data.table::setDT(df)
+  # get movement strategy
+  df[, c("sF", "sH", "sN") := lapply(
+    .SD, function(tr_) {
+      tr_ / (abs(sF) + abs(sH) + abs(sN))
+    }
+  ), .SDcols = c("sF", "sH", "sN")]
+
+  df[, c("wF", "wH", "wN", "w0") := lapply(
+    .SD, function(tr_) {
+      tr_ / (abs(wF) + abs(wH) + abs(wN) + abs(w0))
+    }
+  ), .SDcols = c("wF", "wH", "wN", "w0")]
+}
