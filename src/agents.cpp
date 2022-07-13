@@ -227,7 +227,9 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
         {
             noise_v[i_][j_] = noise(rng);
         }
-    }    
+    }
+
+    float distance_moved = 0.f;
 
     shufflePop();
     // loop over agents --- randomise
@@ -294,10 +296,15 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
                                 noise_v[id][j] // add same very very small noise to all
                             );
 
+                            distance_moved = choose_distance(foodHere, 
+                                static_cast<float>(agentCounts.first), 
+                                static_cast<float>(agentCounts.second), 
+                                wF[id], wH[id], wN[id], w0[id]);
+
                             if (suit_dest > suit_origin) {
                                 // where does the individual really go
-                                newX = coordX[id] + (range_perception * t1_);
-                                newY = coordY[id] + (range_perception * t2_);
+                                newX = coordX[id] + (distance_moved * t1_);
+                                newY = coordY[id] + (distance_moved * t2_);
 
                                 newX = wrapLoc(newX, food.dSize);
                                 newY = wrapLoc(newY, food.dSize);
@@ -308,7 +315,7 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
                             }
                         }
                         // distance to be moved
-                        moved[id] += range_perception;
+                        moved[id] += distance_moved;
 
                         // set locations
                         coordX[id] = newX; coordY[id] = newY;
@@ -316,86 +323,7 @@ void Population::move_mechanistic(const Resources &food, const int nThreads) {
                 }
             }
         );
-    } else if (nThreads == 1) {
-        for (int i = 0; i < nAgents; ++i) {
-            int id = order[i];
-            if (counter[id] > 0) {
-                counter[id] --;
-            }
-            else {
-                // first assess current location
-                float sampleX = coordX[id];
-                float sampleY = coordY[id]; 
-
-                float foodHere = 0.f;
-                // count local food only if items are available
-                if(food.nAvailable > 0) {
-                    foodHere = static_cast<float>(countFood(
-                        food, sampleX, sampleY
-                    ));
-                }
-                // count local handlers and non-handlers
-                std::pair<int, int> agentCounts = countAgents(sampleX, sampleY);
-                
-                // get suitability current
-                float suit_origin = (
-                    (sF[id] * foodHere) + (sH[id] * agentCounts.first) +
-                    (sN[id] * agentCounts.second)
-                );
-
-                float newX = sampleX;
-                float newY = sampleY;
-                // now sample at three locations around
-                for(size_t j = 0; j < sample_angles.size(); j++) {
-                    float t1_ = static_cast<float>(cos(sample_angles[j]));
-                    float t2_ = static_cast<float>(sin(sample_angles[j]));
-                    
-                    // use range for agents to determine sample locs
-                    sampleX = coordX[id] + (range_perception * t1_);
-                    sampleY = coordY[id] + (range_perception * t2_);
-
-                    // crudely wrap sampling location
-                    sampleX = wrapLoc(sampleX, food.dSize);
-                    sampleY = wrapLoc(sampleY, food.dSize);
-
-                    // count food at sample locations if any available
-                    if(food.nAvailable > 0) {
-                        foodHere = static_cast<float>(countFood(
-                            food, sampleX, sampleY
-                        ));
-                    }
-                    
-                    // count local handlers and non-handlers
-                    std::pair<int, int> agentCounts = countAgents(sampleX, sampleY);
-
-                    float suit_dest = (
-                        (sF[id] * foodHere) + (sH[id] * agentCounts.first) +
-                        (sN[id] * agentCounts.second) +
-                        noise_v[id][j] // add same very very small noise to all
-                    );
-
-                    if (suit_dest > suit_origin) {
-                        // where does the individual really go
-                        newX = coordX[id] + (range_perception * t1_);
-                        newY = coordY[id] + (range_perception * t2_);
-
-                        // crudely wrap MOVEMENT location
-                        newX = wrapLoc(newX, food.dSize);
-                        newY = wrapLoc(newY, food.dSize);
-
-                        assert(newX < food.dSize && newX > 0.f);
-                        assert(newY < food.dSize && newY > 0.f);
-                        suit_origin = suit_dest;
-                    }
-                }
-                // distance to be moved
-                moved[id] += range_perception;
-
-                // set locations
-                coordX[id] = newX; coordY[id] = newY;
-            }
-        }
-    }
+    } 
 }
 
 /// population movement function for movement with preferences
