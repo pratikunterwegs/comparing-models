@@ -68,6 +68,11 @@ void Population::setTrait(const float mSize) {
         sF[i] = agent_ran_trait(rng);
         sH[i] = agent_ran_trait(rng);
         sN[i] = agent_ran_trait(rng);
+
+        wF[i] = agent_ran_trait(rng);
+        wH[i] = agent_ran_trait(rng);
+        wN[i] = agent_ran_trait(rng);
+        w0[i] = agent_ran_trait(rng);
     }
 }
 
