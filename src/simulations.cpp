@@ -12,7 +12,7 @@ Rcpp::List simulation::do_simulation_mechanistic() {
 
     unsigned seed = static_cast<unsigned> (std::chrono::system_clock::now().time_since_epoch().count());
     rng.seed(seed);
-    
+
     // prepare landscape and pop
     food.initResources();
     food.countAvailable();
@@ -71,8 +71,6 @@ Rcpp::List simulation::do_simulation_mechanistic() {
             }
             // timestep ends here
         }
-        
-        pop.energy = pop.intake;
 
         // log data in the last generation
         if (gen == (genmax - 1)) {
