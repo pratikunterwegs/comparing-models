@@ -771,6 +771,9 @@ std::vector<float> Population::handleFitness() {
 
     // energy is intake --- move here from sim.cpp
     energy = intake;
+    // for(size_t i = 0; i < static_cast<size_t>(nAgents); i++) {
+    //     energy[i] -= (moved[i] * 0.01f);
+    // }
 
     // sort vec fitness
     std::vector<float> vecFitness = energy;
