@@ -50,7 +50,7 @@ trait_data = rbindlist(trait_data)
 
 # subset
 trait_data = trait_data[type %in% c(
-  c("random", "optimal", "2pref", "evolved"
+  c("random", "optimal", "evolved"
   )
 )]
 
@@ -102,20 +102,20 @@ fig_hypervolume = ggplot(
     alpha = 0.6
   )+
   geom_hline(
-      yintercept = 0, # size = 0.2,
-      col = "grey"
-    )+
-    geom_vline(
-      xintercept = 0, # size = 0.2,
-      col = "grey"
-    )+
-    geom_abline(
-      slope = c(-1, 1),
-      intercept = c(1, -1),
-      col = "grey",
-      lty = 2,
-      size = 0.5
-    )+
+    yintercept = 0, # size = 0.2,
+    col = "grey"
+  )+
+  geom_vline(
+    xintercept = 0, # size = 0.2,
+    col = "grey"
+  )+
+  geom_abline(
+    slope = c(-1, 1),
+    intercept = c(1, -1),
+    col = "grey",
+    lty = 2,
+    size = 0.5
+  )+
   geom_text(
       data = data.table(
         x = c(1, 0.1, 0.1),
@@ -195,9 +195,9 @@ p_intake =
     labels = c(
       "Random\nwalk", "Locally optimal\nmovement",
       # "Mechanistic\n2 cues\nG = 1",
-      "Mechanistic\n2 cues",
-      # "Mechanistic\n3 cues\nG = 1",
-      "Mechanistic\n3 cues"
+      # "Mechanistic\n2 cues",
+      # "Evolved assessment\nG = 1",
+      "Evolved assessment"
     ),
     name = NULL
   )+
@@ -242,9 +242,9 @@ p_move =
     labels = c(
       "Random\nwalk", "Locally optimal\nmovement",
       # "Mechanistic\n2 cues\nG = 1",
-      "Mechanistic\n2 cues",
-      # "Mechanistic\n3 cues\nG = 1",
-      "Mechanistic\n3 cues"
+      # "Mechanistic\n2 cues",
+      # "Evolved assessment\nG = 1",
+      "Evolved assessment"
     ),
     name = NULL
   )+
@@ -286,9 +286,9 @@ p_assoc =
     labels = c(
       "Random\nwalk", "Locally optimal\nmovement",
       # "Mechanistic\n2 cues\nG = 1",
-      "Mechanistic\n2 cues",
-      # "Mechanistic\n3 cues\nG = 1",
-      "Mechanistic\n3 cues"
+      # "Mechanistic\n2 cues",
+      # "Evolved assessment\nG = 1",
+      "Evolved assessment"
     ),
     name = NULL
   )+
@@ -343,7 +343,7 @@ fig_eco_outcomes =
 
 ggsave(
   fig_eco_outcomes,
-  filename = "figures/fig_case_study_ecological_outcomes.png",
+  filename = "figures/fig_case_study_ecological_outcomes_alt.png",
   width = 120, height = 70, units = "mm"
 )
 ```
@@ -401,8 +401,8 @@ ggplot(data_sir[time < 5 & class == "NI"])+
       "Random\nwalk", "Locally optimal\nmovement",
       "Mechanistic\n2 cues\nG = 1",
       "Mechanistic\n2 cues\nG = 100",
-      "Mechanistic\n3 cues\nG = 1",
-      "Mechanistic\n3 cues\nG = 100"
+      "Evolved assessment\nG = 1",
+      "Evolved assessment\nG = 100"
     ),
     name = NULL
   )+
