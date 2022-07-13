@@ -28,12 +28,17 @@ public:
         sH (popsize, 0.f),
         sN (popsize, 0.f),
         
+        wF (popsize, 0.f),
+        wH (popsize, 0.f),
+        wN (popsize, 0.f),
+        w0 (popsize, 0.f),
+
         // counters for handling and social metrics
         counter (popsize, 0),
         associations(popsize, 0),
 
         // agent sensory parameters
-        n_samples (8.f),
+        n_samples (5.f),
         range_perception(range_perception),
         handling_time(handling_time),
 
@@ -57,10 +62,17 @@ public:
     std::vector<float> initY;
     std::vector<float> intake;
     std::vector<float> energy;
-    // weights
+
+    // weights for angles
     std::vector<float> sF;
     std::vector<float> sH;
     std::vector<float> sN;
+
+    // weights for distances
+    std::vector<float> wF;
+    std::vector<float> wH;
+    std::vector<float> wN;
+    std::vector<float> w0;
 
     // counter and metrics
     std::vector<int> counter;
