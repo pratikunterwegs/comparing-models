@@ -194,6 +194,15 @@ float wrapLoc(float l, float maxl) {
     }
 }
 
+/// function to choose distance based on local cues
+float choose_distance(const float items, const float handlers, const float nonhandlers, const float wF, const float wH, const float wN, const float w0) {
+
+    float distance_to_move = std::exp((items * wF) + (handlers * wH) + (nonhandlers * wN) + w0);
+
+    return distance_to_move;
+
+}
+
 /// population movement function
 void Population::move_mechanistic(const Resources &food, const int nThreads) {
 
