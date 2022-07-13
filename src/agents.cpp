@@ -768,6 +768,10 @@ void Population::countAssoc(const int nThreads) {
 
 /// minor function to normalise vector
 std::vector<float> Population::handleFitness() {
+
+    // energy is intake --- move here from sim.cpp
+    energy = intake;
+
     // sort vec fitness
     std::vector<float> vecFitness = energy;
     std::sort(vecFitness.begin(), vecFitness.end()); // sort to to get min-max
