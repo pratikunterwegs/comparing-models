@@ -810,6 +810,11 @@ void Population::Reproduce(const Resources food,
     std::vector<float> tmp_sF (nAgents, 0.f);
     std::vector<float> tmp_sH (nAgents, 0.f);
     std::vector<float> tmp_sN (nAgents, 0.f);
+
+    std::vector<float> tmp_wF (nAgents, 0.f);
+    std::vector<float> tmp_wH (nAgents, 0.f);
+    std::vector<float> tmp_wN (nAgents, 0.f);
+    std::vector<float> tmp_w0 (nAgents, 0.f);
     
     // reset associations
     associations = std::vector<int> (nAgents, 0);
@@ -830,6 +835,11 @@ void Population::Reproduce(const Resources food,
         tmp_sF[a] = sF[parent_id];
         tmp_sH[a] = sH[parent_id];
         tmp_sN[a] = sN[parent_id];
+
+        tmp_wF[a] = wF[parent_id];
+        tmp_wH[a] = wH[parent_id];
+        tmp_wN[a] = wN[parent_id];
+        tmp_w0[a] = w0[parent_id];
 
         // inherit positions from parent
         coord_x_2[a] = coordX[parent_id] + sprout(rng);
@@ -869,14 +879,34 @@ void Population::Reproduce(const Resources food,
         if(mutation_happens(rng)) {
             tmp_sN[a] = tmp_sN[a] + mutation_size(rng);
         }
+
+        // mutation on movement weights
+        if(mutation_happens(rng)) {
+            tmp_wF[a] = tmp_wF[a] + mutation_size(rng);
+        }
+        if(mutation_happens(rng)) {
+            tmp_wH[a] = tmp_wH[a] + mutation_size(rng);
+        }
+        if(mutation_happens(rng)) {
+            tmp_wN[a] = tmp_wN[a] + mutation_size(rng);
+        }
+        if(mutation_happens(rng)) {
+            tmp_w0[a] = tmp_w0[a] + mutation_size(rng);
+        }
     }
     
-    // swap trait matrices
+    // swap trait vectors
     std::swap(sF, tmp_sF);
     std::swap(sH, tmp_sH);
     std::swap(sN, tmp_sN);
 
+    std::swap(wF, tmp_wF);
+    std::swap(wH, tmp_wH);
+    std::swap(wN, tmp_wN);
+    std::swap(w0, tmp_w0);
+
     tmp_sF.clear(); tmp_sH.clear(); tmp_sN.clear();
+    tmp_wF.clear(); tmp_wH.clear(); tmp_wN.clear(); tmp_w0.clear();
     
     // swap energy
     std::vector<float> tmpEnergy (nAgents, 0.001);
