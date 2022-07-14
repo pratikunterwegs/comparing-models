@@ -83,7 +83,7 @@ float get_distance(float x1, float x2, float y1, float y2) {
 
 // general function for agents within distance
 std::pair<int, int> Population::countAgents (
-    const size_t which_agent) {
+    const float x, const float y) {
     
     int handlers = 0;
     int nonhandlers = 0;
@@ -91,7 +91,7 @@ std::pair<int, int> Population::countAgents (
     // query for a simple box
     agentRtree.query(bgi::satisfies([&](value const& v) {
         return bg::distance(v.first, 
-            point(coordX[which_agent], coordY[which_agent])) < range_perception;}),
+            point(x, y)) < range_perception;}),
             std::back_inserter(near_agents));
 
     BOOST_FOREACH(value const& v, near_agents) {
@@ -106,7 +106,7 @@ std::pair<int, int> Population::countAgents (
 
 // function for near agent ids
 std::vector<int> Population::getNeighbourId (
-    const size_t which_agent) {
+    const float x, const float y) {
     
     std::vector<int> agent_id;
     std::vector<value> near_agents;
@@ -114,7 +114,7 @@ std::vector<int> Population::getNeighbourId (
     // neighbours for associations are counted over the MOVEMENT RANGE
     agentRtree.query(bgi::satisfies([&](value const& v) {
         return bg::distance(v.first, 
-            point(coordX[which_agent], coordY[which_agent])
+            point(x, y)
             ) < range_perception;}),
         std::back_inserter(near_agents));
 
@@ -130,7 +130,7 @@ std::vector<int> Population::getNeighbourId (
 // general function for items within distance
 int Population::countFood (
     const Resources &food,
-    const size_t which_agent) {
+    const float x, const float y) {
 
     int nFood = 0;
     std::vector<value> near_food;
@@ -140,7 +140,7 @@ int Population::countFood (
         // query for a simple box
         food.rtree.query(bgi::satisfies([&](value const& v) {
             return bg::distance(v.first, 
-            point(coordX[which_agent], coordY[which_agent])) < range_perception;}),
+            point(x, y)) < range_perception;}),
             std::back_inserter(near_food));
 
         BOOST_FOREACH(value const& v, near_food) {
@@ -158,7 +158,7 @@ int Population::countFood (
 // function for the nearest available food item
 std::vector<int> Population::getFoodId (
     const Resources &food,
-    const size_t which_agent) {
+    const float x, const float y) {
         
     std::vector<int> food_id;
     std::vector<value> near_food;
@@ -168,7 +168,7 @@ std::vector<int> Population::getFoodId (
         // food is accessed over the MOVEMENT RANGE
         food.rtree.query(bgi::satisfies([&](value const& v) {
             return bg::distance(v.first, 
-                point(coordX[which_agent], coordY[which_agent])) < range_perception;}), 
+                point(x, y)) < range_perception;}), 
             std::back_inserter(near_food));
 
         BOOST_FOREACH(value const& v, near_food) {
@@ -235,101 +235,98 @@ void Population::do_natal_dispersal(const Resources &food) {
     }
 
     shufflePop();
-    // loop over agents --- randomise
-    if (nThreads > 1) {
-        // any number above 1 will allow automatic n threads
-        tbb::task_scheduler_init _tbb(tbb::task_scheduler_init::automatic); // automatic for now
-        // try parallel
-        tbb::parallel_for(
-            tbb::blocked_range<unsigned>(1, order.size()),
-            [&](const tbb::blocked_range<unsigned>& r) {
-                for (unsigned i = r.begin(); i < r.end(); ++i) {
-                    int id = order[i];
-                    if (counter[id] > 0) {
-                        counter[id] --;
-                    }
-                    else {
-                        // first assess current location
-                        float sampleX = coordX[id];
-                        float sampleY = coordY[id]; 
+    // any number above 1 will allow automatic n threads
+    tbb::task_scheduler_init _tbb(tbb::task_scheduler_init::automatic); // automatic for now
+    // try parallel
+    tbb::parallel_for(
+        tbb::blocked_range<unsigned>(1, order.size()),
+        [&](const tbb::blocked_range<unsigned>& r) {
+            for (unsigned i = r.begin(); i < r.end(); ++i) {
+                int id = order[i];
+                if (counter[id] > 0) {
+                    counter[id] --;
+                }
+                else {
+                    // first assess current location
+                    float sampleX = coordX[id];
+                    float sampleY = coordY[id]; 
 
-                        float foodHere = 0.f;
-                        // count local food only if items are available
+                    float foodHere = 0.f;
+                    // count local food only if items are available
+                    if(food.nAvailable > 0) {
+                        foodHere = static_cast<float>(countFood(
+                            food, sampleX, sampleY
+                        ));
+                    }
+                    // count local handlers and non-handlers
+                    std::pair<int, int> agentCounts = countAgents(sampleX, sampleY);
+                    
+                    // get suitability current
+                    float suit_origin = (
+                        (sF[id] * foodHere) + (sH[id] * agentCounts.first) +
+                        (sN[id] * agentCounts.second)
+                    );
+
+                    float newX = sampleX;
+                    float newY = sampleY;
+
+                    float dispersal_distance = choose_distance(
+                        foodHere, static_cast<float>(agentCounts.first),
+                        static_cast<float>(agentCounts.second),
+                        wF[id], wH[id], wN[id], w0[id]
+                    );
+
+                    // now sample at three locations around
+                    for(size_t j = 0; j < sample_angles.size(); j++) {
+                        float t1_ = static_cast<float>(cos(sample_angles[j]));
+                        float t2_ = static_cast<float>(sin(sample_angles[j]));
+                        
+                        // use range for agents to determine sample locs
+                        sampleX = coordX[id] + (range_perception * t1_);
+                        sampleY = coordY[id] + (range_perception * t2_);
+
+                        sampleX = wrapLoc(sampleX, food.dSize);
+                        sampleY = wrapLoc(sampleY, food.dSize);
+
+                        // count food at sample locations if any available
                         if(food.nAvailable > 0) {
                             foodHere = static_cast<float>(countFood(
                                 food, sampleX, sampleY
                             ));
                         }
+                        
                         // count local handlers and non-handlers
                         std::pair<int, int> agentCounts = countAgents(sampleX, sampleY);
-                        
-                        // get suitability current
-                        float suit_origin = (
+
+                        float suit_dest = (
                             (sF[id] * foodHere) + (sH[id] * agentCounts.first) +
-                            (sN[id] * agentCounts.second)
+                            (sN[id] * agentCounts.second) +
+                            noise_v[id][j] // add same very very small noise to all
                         );
 
-                        float newX = sampleX;
-                        float newY = sampleY;
+                        if (suit_dest > suit_origin) {
+                            // where does the individual disperse; distance is set by local
+                            // conditions
+                            newX = coordX[id] + (dispersal_distance * t1_);
+                            newY = coordY[id] + (dispersal_distance * t2_);
 
-                        float dispersal_distance = choose_distance(
-                            foodHere, static_cast<float>(agentCounts.first),
-                            static_cast<float>(agentCounts.second),
-                            wF[id], wH[id], wN[id], w0[id]
-                        );
+                            newX = wrapLoc(newX, food.dSize);
+                            newY = wrapLoc(newY, food.dSize);
 
-                        // now sample at three locations around
-                        for(size_t j = 0; j < sample_angles.size(); j++) {
-                            float t1_ = static_cast<float>(cos(sample_angles[j]));
-                            float t2_ = static_cast<float>(sin(sample_angles[j]));
-                            
-                            // use range for agents to determine sample locs
-                            sampleX = coordX[id] + (range_perception * t1_);
-                            sampleY = coordY[id] + (range_perception * t2_);
-
-                            sampleX = wrapLoc(sampleX, food.dSize);
-                            sampleY = wrapLoc(sampleY, food.dSize);
-
-                            // count food at sample locations if any available
-                            if(food.nAvailable > 0) {
-                                foodHere = static_cast<float>(countFood(
-                                    food, sampleX, sampleY
-                                ));
-                            }
-                            
-                            // count local handlers and non-handlers
-                            std::pair<int, int> agentCounts = countAgents(sampleX, sampleY);
-
-                            float suit_dest = (
-                                (sF[id] * foodHere) + (sH[id] * agentCounts.first) +
-                                (sN[id] * agentCounts.second) +
-                                noise_v[id][j] // add same very very small noise to all
-                            );
-
-                            if (suit_dest > suit_origin) {
-                                // where does the individual disperse; distance is set by local
-                                // conditions
-                                newX = coordX[id] + (dispersal_distance * t1_);
-                                newY = coordY[id] + (dispersal_distance * t2_);
-
-                                newX = wrapLoc(newX, food.dSize);
-                                newY = wrapLoc(newY, food.dSize);
-
-                                assert(newX < food.dSize && newX > 0.f);
-                                assert(newY < food.dSize && newY > 0.f);
-                                suit_origin = suit_dest;
-                            }
+                            assert(newX < food.dSize && newX > 0.f);
+                            assert(newY < food.dSize && newY > 0.f);
+                            suit_origin = suit_dest;
                         }
-                        // distance to be moved
-                        moved[id] += dispersal_distance;
-
-                        // set locations
-                        coordX[id] = newX; coordY[id] = newY;
                     }
+                    // distance to be moved
+                    moved[id] += dispersal_distance;
+
+                    // set locations
+                    coordX[id] = newX; coordY[id] = newY;
                 }
             }
-        );
-    }
+        }
+    );
 }
 
 /// population movement function
@@ -360,93 +357,91 @@ void Population::move(const Resources &food) {
 
     shufflePop();
     // loop over agents --- randomise
-    if (nThreads > 1) {
-        // any number above 1 will allow automatic n threads
-        tbb::task_scheduler_init _tbb(tbb::task_scheduler_init::automatic); // automatic for now
-        // try parallel
-        tbb::parallel_for(
-            tbb::blocked_range<unsigned>(1, order.size()),
-            [&](const tbb::blocked_range<unsigned>& r) {
-                for (unsigned i = r.begin(); i < r.end(); ++i) {
-                    int id = order[i];
-                    if (counter[id] > 0) {
-                        counter[id] --;
-                    }
-                    else {
-                        // first assess current location
-                        float sampleX = coordX[id];
-                        float sampleY = coordY[id]; 
+    // any number above 1 will allow automatic n threads
+    tbb::task_scheduler_init _tbb(tbb::task_scheduler_init::automatic); // automatic for now
+    // try parallel
+    tbb::parallel_for(
+        tbb::blocked_range<unsigned>(1, order.size()),
+        [&](const tbb::blocked_range<unsigned>& r) {
+            for (unsigned i = r.begin(); i < r.end(); ++i) {
+                int id = order[i];
+                if (counter[id] > 0) {
+                    counter[id] --;
+                }
+                else {
+                    // first assess current location
+                    float sampleX = coordX[id];
+                    float sampleY = coordY[id]; 
 
-                        float foodHere = 0.f;
-                        // count local food only if items are available
+                    float foodHere = 0.f;
+                    // count local food only if items are available
+                    if(food.nAvailable > 0) {
+                        foodHere = static_cast<float>(countFood(
+                            food, sampleX, sampleY
+                        ));
+                    }
+                    // count local handlers and non-handlers
+                    std::pair<int, int> agentCounts = countAgents(sampleX, sampleY);
+                    
+                    // get suitability current
+                    float suit_origin = (
+                        (sF[id] * foodHere) + (sH[id] * agentCounts.first) +
+                        (sN[id] * agentCounts.second)
+                    );
+
+                    float newX = sampleX;
+                    float newY = sampleY;
+                    // now sample at three locations around
+                    for(size_t j = 0; j < sample_angles.size(); j++) {
+                        float t1_ = static_cast<float>(cos(sample_angles[j]));
+                        float t2_ = static_cast<float>(sin(sample_angles[j]));
+                        
+                        // use range for agents to determine sample locs
+                        sampleX = coordX[id] + (range_perception * t1_);
+                        sampleY = coordY[id] + (range_perception * t2_);
+
+                        sampleX = wrapLoc(sampleX, food.dSize);
+                        sampleY = wrapLoc(sampleY, food.dSize);
+
+                        // count food at sample locations if any available
                         if(food.nAvailable > 0) {
                             foodHere = static_cast<float>(countFood(
                                 food, sampleX, sampleY
                             ));
                         }
+                        
                         // count local handlers and non-handlers
                         std::pair<int, int> agentCounts = countAgents(sampleX, sampleY);
-                        
-                        // get suitability current
-                        float suit_origin = (
+
+                        float suit_dest = (
                             (sF[id] * foodHere) + (sH[id] * agentCounts.first) +
-                            (sN[id] * agentCounts.second)
+                            (sN[id] * agentCounts.second) +
+                            noise_v[id][j] // add same very very small noise to all
                         );
 
-                        float newX = sampleX;
-                        float newY = sampleY;
-                        // now sample at three locations around
-                        for(size_t j = 0; j < sample_angles.size(); j++) {
-                            float t1_ = static_cast<float>(cos(sample_angles[j]));
-                            float t2_ = static_cast<float>(sin(sample_angles[j]));
-                            
-                            // use range for agents to determine sample locs
-                            sampleX = coordX[id] + (range_perception * t1_);
-                            sampleY = coordY[id] + (range_perception * t2_);
+                        if (suit_dest > suit_origin) {
+                            // where does the individual really go, the movement distance is
+                            // determined by the exponent of w0
+                            newX = coordX[id] + (std::exp(w0[id]) * t1_);
+                            newY = coordY[id] + (std::exp(w0[id]) * t2_);
 
-                            sampleX = wrapLoc(sampleX, food.dSize);
-                            sampleY = wrapLoc(sampleY, food.dSize);
+                            newX = wrapLoc(newX, food.dSize);
+                            newY = wrapLoc(newY, food.dSize);
 
-                            // count food at sample locations if any available
-                            if(food.nAvailable > 0) {
-                                foodHere = static_cast<float>(countFood(
-                                    food, sampleX, sampleY
-                                ));
-                            }
-                            
-                            // count local handlers and non-handlers
-                            std::pair<int, int> agentCounts = countAgents(sampleX, sampleY);
-
-                            float suit_dest = (
-                                (sF[id] * foodHere) + (sH[id] * agentCounts.first) +
-                                (sN[id] * agentCounts.second) +
-                                noise_v[id][j] // add same very very small noise to all
-                            );
-
-                            if (suit_dest > suit_origin) {
-                                // where does the individual really go, the movement distance is
-                                // determined by the exponent of w0
-                                newX = coordX[id] + (std::exp(w0[id]) * t1_);
-                                newY = coordY[id] + (std::exp(w0[id]) * t2_);
-
-                                newX = wrapLoc(newX, food.dSize);
-                                newY = wrapLoc(newY, food.dSize);
-
-                                assert(newX < food.dSize && newX > 0.f);
-                                assert(newY < food.dSize && newY > 0.f);
-                                suit_origin = suit_dest;
-                            }
+                            assert(newX < food.dSize && newX > 0.f);
+                            assert(newY < food.dSize && newY > 0.f);
+                            suit_origin = suit_dest;
                         }
-                        // distance to be moved
-                        moved[id] += std::exp(w0[id]);
-
-                        // set locations
-                        coordX[id] = newX; coordY[id] = newY;
                     }
+                    // distance to be moved
+                    moved[id] += std::exp(w0[id]);
+
+                    // set locations
+                    coordX[id] = newX; coordY[id] = newY;
                 }
             }
-        );
-    } 
+        }
+    );
 }
 
 // function to paralellise choice of forage item
