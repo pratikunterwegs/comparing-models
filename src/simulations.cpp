@@ -21,9 +21,6 @@ Rcpp::List simulation::do_simulation() {
     pop.setTrait(mSize);
     Rcpp::Rcout << "pop with " << pop.nAgents << " agents for " << genmax << " gens " << tmax << " timesteps\n";
 
-    // prepare scenario
-    Rcpp::Rcout << "this is scenario " << scenario << ": evolved movement with competitor state preference\n";
-
     // agent random position in first gen
     pop.initPos(food);
     // Rcpp::Rcout << "initialised population positions\n";
@@ -44,7 +41,7 @@ Rcpp::List simulation::do_simulation() {
         // Rcpp::Rcout << "entering ecological timescale\n";
 
         // do dispersal
-        pop.do_natal_dispersal(food, nThreads);
+        pop.do_natal_dispersal(food);
 
         // timesteps start here
         for (size_t t = 0; t < static_cast<size_t>(tmax); t++)
@@ -55,7 +52,7 @@ Rcpp::List simulation::do_simulation() {
             pop.updateRtree();
             // Rcpp::Rcout << "updated r tree\n";
             // movement section
-            pop.move(food, nThreads);
+            pop.move(food);
             // Rcpp::Rcout << "moved\n";
 
             // if(gen == (genmax - 1)) {
