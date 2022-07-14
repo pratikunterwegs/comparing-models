@@ -48,3 +48,9 @@ inst
 jobs
 tests
 vignettes
+
+fun_check_cluster.R
+fun_handle_data.R
+fun_make_parameters.R
+fun_use_cluster.R
+do_sim_pathomove.R
