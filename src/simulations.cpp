@@ -152,19 +152,17 @@ S4 model_case_2(const int popsize,
         mProb, mSize
     );
 
-    // return scenario as string
-    std::string scenario_str;
+    // return output as rcpp list
     Rcpp::List simOutput;                    
     simOutput = this_sim.do_simulation();
 
     // parameter list
     Rcpp::List param_list = Rcpp::List::create(
-            Named("scenario") = scenario_str,
-            Named("generations") = genmax,
-            Named("timesteps") = tmax,
-            Named("pop_size") = popsize,
-            Named("dispersal") = dispersal
-        );
+        Named("generations") = genmax,
+        Named("timesteps") = tmax,
+        Named("pop_size") = popsize,
+        Named("dispersal") = dispersal
+    );
 
     // create S4 class pathomove output and fill slots
     S4 x("simulation_output");
