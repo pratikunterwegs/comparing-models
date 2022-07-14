@@ -63,16 +63,17 @@ void Population::setTrait(const float mSize) {
 
     // create a cauchy distribution, mSize is the scale
     std::cauchy_distribution<float> agent_ran_trait(0.f, mSize);
+    std::normal_distribution<float> agent_ran_dist_trait(0.f, mSize * 10.f);
 
     for(int i = 0; i < nAgents; i++) {
         sF[i] = agent_ran_trait(rng);
         sH[i] = agent_ran_trait(rng);
         sN[i] = agent_ran_trait(rng);
 
-        wF[i] = agent_ran_trait(rng);
-        wH[i] = agent_ran_trait(rng);
-        wN[i] = agent_ran_trait(rng);
-        w0[i] = agent_ran_trait(rng);
+        wF[i] = agent_ran_dist_trait(rng);
+        wH[i] = agent_ran_dist_trait(rng);
+        wN[i] = agent_ran_dist_trait(rng);
+        w0[i] = agent_ran_dist_trait(rng);
     }
 }
 
