@@ -18,10 +18,6 @@ get_test_landscape <- function(nItems, landsize, nClusters, clusterSpread, regen
 #' @description Run the simulation using parameters passed as
 #' arguments to the corresponding R function.
 #'
-#' @param scenario The scenario: 0 for random movement, 1 for optimal movement,
-#' 2 for evolved mechanistic movement with preferences for food items and
-#' individuals, and 3 for evolved mechanistic movement with preferences for
-#' food items, and for individuals differentiated by their handling status.
 #' @param popsize The population size.
 #' @param nItems How many food items on the landscape.
 #' @param landsize The size of the landscape as a numeric (double).
@@ -45,7 +41,7 @@ get_test_landscape <- function(nItems, landsize, nClusters, clusterSpread, regen
 #' @param mSize Controls the mutational step size, and represents the scale
 #' parameter of a Cauchy distribution. 
 #' @return An S4 class, `pathomove_output`, with simulation outcomes.
-model_case_2 <- function(scenario, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize) {
-    .Call(`_ecoevomove2_model_case_2`, scenario, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize)
+model_case_2 <- function(popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize) {
+    .Call(`_ecoevomove2_model_case_2`, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize)
 }
 

@@ -26,12 +26,11 @@ BEGIN_RCPP
 END_RCPP
 }
 // model_case_2
-S4 model_case_2(const int scenario, const int popsize, const int nItems, const float landsize, const int nClusters, const float clusterSpread, const int tmax, const int genmax, const float range_perception, const int handling_time, const int regen_time, const int nThreads, const float dispersal, const float mProb, const float mSize);
-RcppExport SEXP _ecoevomove2_model_case_2(SEXP scenarioSEXP, SEXP popsizeSEXP, SEXP nItemsSEXP, SEXP landsizeSEXP, SEXP nClustersSEXP, SEXP clusterSpreadSEXP, SEXP tmaxSEXP, SEXP genmaxSEXP, SEXP range_perceptionSEXP, SEXP handling_timeSEXP, SEXP regen_timeSEXP, SEXP nThreadsSEXP, SEXP dispersalSEXP, SEXP mProbSEXP, SEXP mSizeSEXP) {
+S4 model_case_2(const int popsize, const int nItems, const float landsize, const int nClusters, const float clusterSpread, const int tmax, const int genmax, const float range_perception, const int handling_time, const int regen_time, const int nThreads, const float dispersal, const float mProb, const float mSize);
+RcppExport SEXP _ecoevomove2_model_case_2(SEXP popsizeSEXP, SEXP nItemsSEXP, SEXP landsizeSEXP, SEXP nClustersSEXP, SEXP clusterSpreadSEXP, SEXP tmaxSEXP, SEXP genmaxSEXP, SEXP range_perceptionSEXP, SEXP handling_timeSEXP, SEXP regen_timeSEXP, SEXP nThreadsSEXP, SEXP dispersalSEXP, SEXP mProbSEXP, SEXP mSizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const int >::type scenario(scenarioSEXP);
     Rcpp::traits::input_parameter< const int >::type popsize(popsizeSEXP);
     Rcpp::traits::input_parameter< const int >::type nItems(nItemsSEXP);
     Rcpp::traits::input_parameter< const float >::type landsize(landsizeSEXP);
@@ -46,14 +45,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const float >::type dispersal(dispersalSEXP);
     Rcpp::traits::input_parameter< const float >::type mProb(mProbSEXP);
     Rcpp::traits::input_parameter< const float >::type mSize(mSizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(model_case_2(scenario, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize));
+    rcpp_result_gen = Rcpp::wrap(model_case_2(popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ecoevomove2_get_test_landscape", (DL_FUNC) &_ecoevomove2_get_test_landscape, 5},
-    {"_ecoevomove2_model_case_2", (DL_FUNC) &_ecoevomove2_model_case_2, 15},
+    {"_ecoevomove2_model_case_2", (DL_FUNC) &_ecoevomove2_model_case_2, 14},
     {NULL, NULL, 0}
 };
 
