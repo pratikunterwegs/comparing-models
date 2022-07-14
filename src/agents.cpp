@@ -83,15 +83,16 @@ float get_distance(float x1, float x2, float y1, float y2) {
 
 // general function for agents within distance
 std::pair<int, int> Population::countAgents (
-    const float xloc, const float yloc) {
+    const size_t which_agent) {
     
     int handlers = 0;
     int nonhandlers = 0;
     std::vector<value> near_agents;
     // query for a simple box
     agentRtree.query(bgi::satisfies([&](value const& v) {
-        return bg::distance(v.first, point(xloc, yloc)) < range_perception;}),
-        std::back_inserter(near_agents));
+        return bg::distance(v.first, 
+            point(coordX[which_agent], coordY[which_agent])) < range_perception;}),
+            std::back_inserter(near_agents));
 
     BOOST_FOREACH(value const& v, near_agents) {
         
@@ -105,14 +106,16 @@ std::pair<int, int> Population::countAgents (
 
 // function for near agent ids
 std::vector<int> Population::getNeighbourId (
-    const float xloc, const float yloc) {
+    const size_t which_agent) {
     
     std::vector<int> agent_id;
     std::vector<value> near_agents;
     // query for a simple box
     // neighbours for associations are counted over the MOVEMENT RANGE
     agentRtree.query(bgi::satisfies([&](value const& v) {
-        return bg::distance(v.first, point(xloc, yloc)) < range_perception;}),
+        return bg::distance(v.first, 
+            point(coordX[which_agent], coordY[which_agent])
+            ) < range_perception;}),
         std::back_inserter(near_agents));
 
     BOOST_FOREACH(value const& v, near_agents) {
@@ -127,7 +130,7 @@ std::vector<int> Population::getNeighbourId (
 // general function for items within distance
 int Population::countFood (
     const Resources &food,
-    const float xloc, const float yloc) {
+    const size_t which_agent) {
 
     int nFood = 0;
     std::vector<value> near_food;
@@ -136,7 +139,8 @@ int Population::countFood (
     if (food.nAvailable > 0) {
         // query for a simple box
         food.rtree.query(bgi::satisfies([&](value const& v) {
-            return bg::distance(v.first, point(xloc, yloc)) < range_perception;}),
+            return bg::distance(v.first, 
+            point(coordX[which_agent], coordY[which_agent])) < range_perception;}),
             std::back_inserter(near_food));
 
         BOOST_FOREACH(value const& v, near_food) {
@@ -154,7 +158,7 @@ int Population::countFood (
 // function for the nearest available food item
 std::vector<int> Population::getFoodId (
     const Resources &food,
-    const float xloc, const float yloc) {
+    const size_t which_agent) {
         
     std::vector<int> food_id;
     std::vector<value> near_food;
@@ -163,7 +167,8 @@ std::vector<int> Population::getFoodId (
         // query for a simple box
         // food is accessed over the MOVEMENT RANGE
         food.rtree.query(bgi::satisfies([&](value const& v) {
-            return bg::distance(v.first, point(xloc, yloc)) < range_perception;}), 
+            return bg::distance(v.first, 
+                point(coordX[which_agent], coordY[which_agent])) < range_perception;}), 
             std::back_inserter(near_food));
 
         BOOST_FOREACH(value const& v, near_food) {
