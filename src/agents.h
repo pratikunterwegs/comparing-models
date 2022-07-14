@@ -15,7 +15,7 @@
 // Agent class
 struct Population {
 public:
-    Population(const int popsize, const float range_perception, const int handling_time, const int scenario) :
+    Population(const int popsize, const float range_perception, const int handling_time) :
         // agents, positions, energy and traits
         nAgents (popsize),
         coordX (popsize, 0.0f),
