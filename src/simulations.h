@@ -7,7 +7,7 @@
 
 class simulation {
 public:
-    simulation(const int popsize, const int scenario,
+    simulation(const int popsize,
                const int nItems, const float landsize,
                const int nClusters,
                const float clusterSpread,
@@ -21,11 +21,10 @@ public:
                const float mProb,
                const float mSize):
         // population, food, and data structures
-        pop (popsize, range_perception, handling_time, scenario),
+        pop (popsize, range_perception, handling_time),
         food(nItems, landsize, nClusters, clusterSpread, regen_time),
         
         // eco-evolutionary parameters
-        scenario(scenario),
         tmax(tmax),
         genmax(genmax),
 
@@ -51,7 +50,7 @@ public:
 
     Population pop;
     Resources food;
-    const int scenario, tmax, genmax;
+    const int tmax, genmax;
     const float range_perception;
     const int handling_time;
 
@@ -64,10 +63,7 @@ public:
     moveData mdPre, mdPost;
 
     // funs
-    Rcpp::List do_simulation_mechanistic();
-    Rcpp::List do_simulation_random();
-    Rcpp::List do_simulation_optimal();
-    Rcpp::List do_simulation_2pref();
+    Rcpp::List do_simulation();
 
 };
 
