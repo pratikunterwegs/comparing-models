@@ -119,10 +119,8 @@ public:
     );
 
     // functions to move and forage on a landscape
-    void move_mechanistic(const Resources &food, const int nThreads);
-    void move_random(const Resources &food);
-    void move_optimal(const Resources &food, const int nThreads);
-    void move_2pref(const Resources &food, const int nThreads);
+    void move(const Resources &food, const int nThreads);
+    void do_natal_dispersal(const Resource &food, const int nThreads);
 
     void pickForageItem(const Resources &food, const int nThreads);
     void doForage(Resources &food);
