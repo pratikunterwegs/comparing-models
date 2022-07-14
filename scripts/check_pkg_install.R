@@ -1,15 +1,18 @@
 # check function
 Rcpp::compileAttributes()
-devtools::build()
-devtools::load_all()
-devtools::install(build = T, upgrade = "never")
+# devtools::build()
+# devtools::load_all()
+{
+  sink("install_log.log")
+  devtools::install(build = T, upgrade = "never")
+  sink()
+}
 devtools::document()
 
 library(ggplot2)
 
 # test case 0
 a <- ecoevomove2::model_case_2(
-  scenario = 0,
   landsize = 60,
   nItems = 1800,
   clusterSpread = 1.0,
@@ -17,13 +20,13 @@ a <- ecoevomove2::model_case_2(
   regen_time = 100,
   tmax = 400,
   handling_time = 5,
-  popsize = 500,
+  popsize = 100,
   genmax = 1,
   dispersal = 3,
   range_perception = 1.0,
   mProb = 0.01,
   mSize = 0.01,
-  nThreads = 1
+  nThreads = 2
 )
 
 # test case 3
