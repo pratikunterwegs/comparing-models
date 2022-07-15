@@ -48,6 +48,7 @@ public:
         
         // distance moved
         moved(popsize, 0.f),
+        dispersal(popsize, 0.f),
 
         // a network object
         pbsn(popsize)
@@ -56,27 +57,16 @@ public:
 
     // agent count, coords, and energy
     const int nAgents;
-    std::vector<float> coordX;
-    std::vector<float> coordY;
-    std::vector<float> initX;
-    std::vector<float> initY;
-    std::vector<float> intake;
-    std::vector<float> energy;
+    std::vector<float> coordX, coordY, initX, initY, intake, energy;
 
     // weights for angles
-    std::vector<float> sF;
-    std::vector<float> sH;
-    std::vector<float> sN;
+    std::vector<float> sF, sH, sN;
 
     // weights for distances
-    std::vector<float> wF;
-    std::vector<float> wH;
-    std::vector<float> wN;
-    std::vector<float> w0;
+    std::vector<float> wF, wH, wN, w0;
 
     // counter and metrics
-    std::vector<int> counter;
-    std::vector<int> associations; // number of total interactions
+    std::vector<int> counter, associations; // number of total interactions
 
     // sensory range and foraging
     const float n_samples, range_perception;
@@ -87,7 +77,7 @@ public:
     std::vector<int> forageItem;
 
     // movement distances
-    std::vector<float> moved;
+    std::vector<float> moved, dispersal;
 
     // position rtree
     bgi::rtree< value, bgi::quadratic<16> > agentRtree;
