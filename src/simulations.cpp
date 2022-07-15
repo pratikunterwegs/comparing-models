@@ -18,7 +18,8 @@ Rcpp::List simulation::do_simulation() {
     food.countAvailable();
     Rcpp::Rcout << "landscape with " << food.nClusters << " clusters\n";
 
-    pop.setTrait(mSize);
+    // start at monomorphic population or more diverse pops
+    if(initial_diverse) pop.setTrait(mSize);
     Rcpp::Rcout << "pop with " << pop.nAgents << " agents for " << genmax << " gens " << tmax << " timesteps\n";
 
     // agent random position in first gen
@@ -41,7 +42,7 @@ Rcpp::List simulation::do_simulation() {
         // Rcpp::Rcout << "entering ecological timescale\n";
 
         // do dispersal
-        pop.do_natal_dispersal(food);
+        pop.do_natal_dispersal(food, max_dispersal);
 
         // timesteps start here
         for (size_t t = 0; t < static_cast<size_t>(tmax); t++)
@@ -79,7 +80,7 @@ Rcpp::List simulation::do_simulation() {
         }
 
         // reproduce
-        pop.Reproduce(food, dispersal, mProb, mSize);
+        pop.Reproduce(food, mProb, mSize);
 
         // generation ends here
     }
@@ -114,16 +115,14 @@ Rcpp::List simulation::do_simulation() {
 //' @param regen_time The item regeneration time.
 //' @param nThreads How many threads to parallelise over. Set to 1 to run on
 //' the HPC Peregrine cluster.
-//' @param dispersal A float value; the standard deviation of a normal
-//' distribution centred on zero, which determines how far away from its parent
-//' each individual is initialised. The standard value is 5 percent of the
-//' landscape size (\code{landsize}), and represents local dispersal.
+//' @param max_dispersal The maximum dispersal distance.
 //' Setting this to 10 percent is already almost equivalent to global dispersal.
 //' @param mProb The probability of mutation. The suggested value is 0.01.
 //' While high, this may be more appropriate for a small population; change this
 //' value and \code{popsize} to test the simulation's sensitivity to these values.
 //' @param mSize Controls the mutational step size, and represents the scale
-//' parameter of a Cauchy distribution. 
+//' parameter of a Cauchy distribution.
+//' @param initial_diverse Whether individuals' weights are randomised or zero.
 //' @return An S4 class, `pathomove_output`, with simulation outcomes.
 // [[Rcpp::export]]
 S4 model_case_2(const int popsize,
@@ -137,16 +136,17 @@ S4 model_case_2(const int popsize,
                 const int handling_time,
                 const int regen_time,
                 const int nThreads,
-                const float dispersal,
+                const float max_dispersal,
                 const float mProb,
-                const float mSize) {
+                const float mSize,
+                const bool initial_diverse) {
 
     // make simulation class with input parameters                            
     simulation this_sim(popsize, nItems,
         landsize, nClusters, clusterSpread, tmax,
         genmax, range_perception, handling_time,
-        regen_time, nThreads, dispersal,
-        mProb, mSize
+        regen_time, nThreads, max_dispersal,
+        mProb, mSize, initial_diverse
     );
 
     // return output as rcpp list
@@ -158,7 +158,7 @@ S4 model_case_2(const int popsize,
         Named("generations") = genmax,
         Named("timesteps") = tmax,
         Named("pop_size") = popsize,
-        Named("dispersal") = dispersal
+        Named("max_dispersal") = max_dispersal
     );
 
     // create S4 class pathomove output and fill slots

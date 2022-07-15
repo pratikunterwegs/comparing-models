@@ -17,11 +17,12 @@ public:
                const int handling_time,
                const int regen_time,
                const int nThreads,
-               const float dispersal,
+               const float max_dispersal,
                const float mProb,
-               const float mSize):
+               const float mSize,
+               const bool initial_diverse):
         // population, food, and data structures
-        pop (popsize, range_perception, handling_time),
+        pop (popsize, range_perception, handling_time, max_dispersal),
         food(nItems, landsize, nClusters, clusterSpread, regen_time),
         
         // eco-evolutionary parameters
@@ -37,10 +38,11 @@ public:
         nThreads (nThreads),
 
         // natal dispersal
-        dispersal(dispersal),
+        max_dispersal(max_dispersal),
         // mutation probability and step size
         mProb(mProb),
         mSize(mSize),
+        initial_diverse(initial_diverse),
 
         // movement data
         mdPre(tmax, popsize),
@@ -56,9 +58,10 @@ public:
 
     const int regen_time;
     int nThreads;
-    const float dispersal;
+    const float max_dispersal;
     
     const float mProb, mSize;
+    const bool initial_diverse;
 
     moveData mdPre, mdPost;
 
