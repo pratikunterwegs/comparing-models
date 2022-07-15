@@ -30,18 +30,16 @@ get_test_landscape <- function(nItems, landsize, nClusters, clusterSpread, regen
 #' @param regen_time The item regeneration time.
 #' @param nThreads How many threads to parallelise over. Set to 1 to run on
 #' the HPC Peregrine cluster.
-#' @param dispersal A float value; the standard deviation of a normal
-#' distribution centred on zero, which determines how far away from its parent
-#' each individual is initialised. The standard value is 5 percent of the
-#' landscape size (\code{landsize}), and represents local dispersal.
+#' @param max_dispersal The maximum dispersal distance.
 #' Setting this to 10 percent is already almost equivalent to global dispersal.
 #' @param mProb The probability of mutation. The suggested value is 0.01.
 #' While high, this may be more appropriate for a small population; change this
 #' value and \code{popsize} to test the simulation's sensitivity to these values.
 #' @param mSize Controls the mutational step size, and represents the scale
-#' parameter of a Cauchy distribution. 
+#' parameter of a Cauchy distribution.
+#' @param initial_diverse Whether individuals' weights are randomised or zero.
 #' @return An S4 class, `pathomove_output`, with simulation outcomes.
-model_case_2 <- function(popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize) {
-    .Call(`_ecoevomove2_model_case_2`, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, dispersal, mProb, mSize)
+model_case_2 <- function(popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, max_dispersal, mProb, mSize, initial_diverse) {
+    .Call(`_ecoevomove2_model_case_2`, popsize, nItems, landsize, nClusters, clusterSpread, tmax, genmax, range_perception, handling_time, regen_time, nThreads, max_dispersal, mProb, mSize, initial_diverse)
 }
 
