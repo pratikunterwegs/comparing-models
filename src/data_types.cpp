@@ -18,7 +18,8 @@ Rcpp::DataFrame Population::returnPopData() {
         Named("xn") = coordX,
         Named("yn") = coordY,
         Named("assoc") = associations,
-        Named("moved") = moved
+        Named("moved") = moved,
+        Named("dispersal") = dispersal
     );
     return this_data;
 }
