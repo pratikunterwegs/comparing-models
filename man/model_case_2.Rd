@@ -5,7 +5,6 @@
 \title{Runs an exploitation competition simulation returning structured output.}
 \usage{
 model_case_2(
-  scenario,
   popsize,
   nItems,
   landsize,
@@ -17,15 +16,12 @@ model_case_2(
   handling_time,
   regen_time,
   nThreads,
-  dispersal,
+  max_dispersal,
   mProb,
   mSize
 )
 }
 \arguments{
-\item{scenario}{The scenario: 0 for random movement, 1 for optimal movement,
-2 for evolved mechanistic movement.}
-
 \item{popsize}{The population size.}
 
 \item{nItems}{How many food items on the landscape.}
@@ -49,10 +45,7 @@ model_case_2(
 \item{nThreads}{How many threads to parallelise over. Set to 1 to run on
 the HPC Peregrine cluster.}
 
-\item{dispersal}{A float value; the standard deviation of a normal
-distribution centred on zero, which determines how far away from its parent
-each individual is initialised. The standard value is 5 percent of the
-landscape size (\code{landsize}), and represents local dispersal.
+\item{max_dispersal}{The maximum dispersal distance.
 Setting this to 10 percent is already almost equivalent to global dispersal.}
 
 \item{mProb}{The probability of mutation. The suggested value is 0.01.
