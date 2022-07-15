@@ -15,7 +15,8 @@
 // Agent class
 struct Population {
 public:
-    Population(const int popsize, const float range_perception, const int handling_time) :
+    Population(const int popsize, const float range_perception, 
+        const int handling_time, const float max_dispersal) :
         // agents, positions, energy and traits
         nAgents (popsize),
         coordX (popsize, 0.0f),
@@ -40,6 +41,7 @@ public:
         // agent sensory parameters
         n_samples (5.f),
         range_perception(range_perception),
+        max_dispersal(max_dispersal),
         handling_time(handling_time),
 
         // vectors for agent order
@@ -69,7 +71,7 @@ public:
     std::vector<int> counter, associations; // number of total interactions
 
     // sensory range and foraging
-    const float n_samples, range_perception;
+    const float n_samples, range_perception, max_dispersal;
     const int handling_time;
 
     // shuffle vector and transmission
@@ -110,7 +112,7 @@ public:
 
     // functions to move and forage on a landscape
     void move(const Resources &food);
-    void do_natal_dispersal(const Resources &food);
+    void do_natal_dispersal(const Resources &food, const float max_dispersal);
 
     void pickForageItem(const Resources &food, const int nThreads);
     void doForage(Resources &food);
@@ -118,7 +120,6 @@ public:
     // funs to handle fitness and reproduce
     std::vector<float> handleFitness();
     void Reproduce(const Resources food, 
-        const float dispersal,
         const float mProb,
         const float mSize
     );

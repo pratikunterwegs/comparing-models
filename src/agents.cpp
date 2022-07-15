@@ -201,16 +201,18 @@ float wrapLoc(float l, float maxl) {
 }
 
 /// function to choose distance based on local cues
-float choose_distance(const float items, const float handlers, const float nonhandlers, const float wF, const float wH, const float wN, const float w0) {
+float get_dispersal_distance(const float items, const float handlers, const float nonhandlers, 
+    const float wF, const float wH, const float wN, const float w0,
+    const float max_dispersal) {
 
-    float distance_to_move = std::exp((items * wF) + (handlers * wH) + (nonhandlers * wN) + w0);
+    float distance_to_move = max_dispersal * (1.f / (1.f + std::exp(-((items * wF) + (handlers * wH) + (nonhandlers * wN) + w0))));
 
     return distance_to_move;
 
 }
 
 /// function for natal dispersal
-void Population::do_natal_dispersal(const Resources &food) {
+void Population::do_natal_dispersal(const Resources &food, const float max_dispersal) {
     float twopi = 2.f * M_PI;
     
     // what increment for 3 samples in a circle around the agent
@@ -270,10 +272,11 @@ void Population::do_natal_dispersal(const Resources &food) {
                     float newX = sampleX;
                     float newY = sampleY;
 
-                    float dispersal_distance = choose_distance(
+                    float dispersal_distance = get_dispersal_distance(
                         foodHere, static_cast<float>(agentCounts.first),
                         static_cast<float>(agentCounts.second),
-                        wF[id], wH[id], wN[id], w0[id]
+                        wF[id], wH[id], wN[id], w0[id],
+                        max_dispersal
                     );
 
                     // now sample at three locations around
@@ -319,7 +322,7 @@ void Population::do_natal_dispersal(const Resources &food) {
                         }
                     }
                     // distance to be moved
-                    moved[id] += dispersal_distance;
+                    dispersal[id] += dispersal_distance;
 
                     // set locations
                     coordX[id] = newX; coordY[id] = newY;
@@ -572,15 +575,14 @@ std::vector<float> Population::handleFitness() {
 }
 
 // fun for replication
-void Population::Reproduce(const Resources food,
-    const float dispersal, const float mProb, const float mSize) 
+void Population::Reproduce(const Resources food, const float mProb, const float mSize) 
 {
     // mutation probability and size distribution --- inefficient but oh well
     std::bernoulli_distribution mutation_happens(mProb);
     std::cauchy_distribution<float> mutation_size(0.0, mSize);
 
     // choose the range over which individuals are dispersed
-    std::normal_distribution<float> sprout(0.f, dispersal);
+    std::normal_distribution<float> sprout(0.f, 0.1f);
     std::vector<float> vecFitness;
     vecFitness = handleFitness();
 
@@ -602,6 +604,7 @@ void Population::Reproduce(const Resources food,
 
     // reset distance moved
     moved = std::vector<float> (nAgents, 0.f);
+    dispersal = std::vector<float> (nAgents, 0.f);
 
     // reset adjacency matrix
     pbsn.adjMat = Rcpp::NumericMatrix(nAgents, nAgents);
